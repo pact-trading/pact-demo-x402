@@ -1,11 +1,31 @@
-/** A lens and its line of sight. */
+'use client';
+
+import { useEffect, useState } from 'react';
+
+/** Sightline's generated mark follows the merchant's current Pact logo. */
 export function Mark({ className = 'h-6 w-6' }: { className?: string }) {
+  const [src, setSrc] = useState('/brand/sightline.png');
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      try {
+        const response = await fetch('/api/brand', { cache: 'no-store' });
+        if (!response.ok) return;
+        const brand = (await response.json()) as { logoUrl: string | null };
+        if (active && brand.logoUrl) {
+          setSrc(brand.logoUrl);
+          document.querySelector('link[rel="icon"]')?.setAttribute('href', brand.logoUrl);
+        }
+      } catch { /* Keep the bundled logo while the API is unavailable. */ }
+    };
+    void load();
+    const refresh = () => { if (document.visibilityState === 'visible') void load(); };
+    document.addEventListener('visibilitychange', refresh);
+    return () => { active = false; document.removeEventListener('visibilitychange', refresh); };
+  }, []);
   return (
-    <svg viewBox="0 0 24 24" className={className} aria-hidden>
-      <rect width="24" height="24" rx="6" fill="#111111" />
-      <circle cx="9.5" cy="12" r="4.25" fill="none" stroke="#FFFFFF" strokeWidth="2" />
-      <path d="M13.75 12H20" stroke="#4F7BFF" strokeWidth="2" strokeLinecap="round" />
-    </svg>
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={src} alt="" width={24} height={24} className={`${className} rounded-md object-cover`} referrerPolicy="no-referrer" />
   );
 }
 export function Logo() {
