@@ -14,7 +14,7 @@ export interface Ticker { symbol: string; price: number; change24h: number; volu
 
 export async function tickers(tokens: string[]): Promise<Ticker[]> {
   const list = encodeURIComponent(JSON.stringify(tokens.map(spotSymbol)));
-  const rows = await upstream<Array<{ symbol: string; lastPrice: string; priceChangePercent: string; quoteVolume: string; highPrice: string; lowPrice: string; count: number }>>('binance-spot', `${SPOT}/api/v3/ticker/24hr?symbols=${list}`, { ttlMs: 10_000 });
+  const rows = await upstream<Array<{ symbol: string; lastPrice: string; priceChangePercent: string; quoteVolume: string; highPrice: string; lowPrice: string; count: number }>>('binance-spot', `${SPOT}/api/v3/ticker/24hr?symbols=${list}`, { ttlMs: 3_000 });
   return rows.map(r => ({ symbol: r.symbol.replace(/USDT$/, ''), price: Number(r.lastPrice), change24h: Number(r.priceChangePercent), volume24h: Number(r.quoteVolume), high24h: Number(r.highPrice), low24h: Number(r.lowPrice), trades24h: r.count }));
 }
 

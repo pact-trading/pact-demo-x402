@@ -82,7 +82,14 @@ export async function insight(token = 'SOL') {
   };
 }
 
-/** The free landing-page preview: prices with a real 24h line, and headline previews. */
+/** The free markets table on the landing page: live prices with a real 24h line (hourly closes plus the latest price). */
+export async function markets24h() {
+  const list = await prices(TOKENS.slice(0, 8));
+  const lines = await Promise.all(list.map(p => closes(p.symbol, '1h', 24).catch(() => [] as number[])));
+  return { asOf: new Date().toISOString(), source: 'Binance Spot', prices: list.map((p, i) => ({ symbol: p.symbol, price: p.price, change24h: p.change24h, volume24h: p.volume24h, line: [...lines[i].slice(0, -1), p.price] })) };
+}
+
+/** The free landing-page preview: markets and headline previews. */
 export async function teaser() {
   const list = await prices(TOKENS.slice(0, 8));
   const lines = await Promise.all(list.map(p => closes(p.symbol, '1h', 24).catch(() => [] as number[])));

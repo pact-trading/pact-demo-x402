@@ -3,7 +3,7 @@ import { handle } from 'hono/vercel';
 import { ENDPOINTS, TOKENS } from '@/lib/catalog';
 import { NETWORK, USDT } from '@/lib/chain';
 import { merchant } from '@/lib/server/chain';
-import { insight, news, prices, smartMoney, teaser } from '@/lib/server/market';
+import { insight, markets24h, news, prices, smartMoney, teaser } from '@/lib/server/market';
 import { paywall } from '@/lib/server/paywall';
 import { providerStatus } from '@/lib/server/providers/http';
 import { listCalls } from '@/lib/server/store';
@@ -25,6 +25,8 @@ app.get('/v1', c => c.json({
   endpoints: ENDPOINTS.map(e => ({ path: e.path, name: e.name, priceUsdt: Number(e.priceMinor) / 1e6, summary: e.summary, params: e.params })),
 }));
 app.get('/v1/teaser', async c => c.json(await teaser()));
+// Free and live: the landing page's markets table polls this every few seconds.
+app.get('/v1/markets', async c => { c.header('cache-control', 'no-store'); return c.json(await markets24h()); });
 // The upstream providers behind every paid response, with their last latency and health.
 app.get('/providers', c => c.json({ data: providerStatus() }));
 app.get('/v1/activity', c => c.json({ data: listCalls(undefined, 30).map(({ id, endpoint, priceMinor, payer, txHash, at, via, status }) => ({ id, endpoint, priceMinor, payer, txHash, at, via, status })) }));

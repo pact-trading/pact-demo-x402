@@ -1,10 +1,10 @@
 import { Building2, Coins, Tags, Timer, ArrowRight, ArrowUpRight, BookOpen, Bot, Code2, FlaskConical, Monitor, Send, ShieldCheck, Wallet } from 'lucide-react';
 import { DatasetIcon } from '@/components/dataset-icon';
 import Link from 'next/link';
-import { Sparkline } from '@/components/sparkline';
+import { MarketsTable } from '@/components/markets-table';
 import { ENDPOINTS } from '@/lib/catalog';
 import { explorer, short, usd } from '@/lib/chain';
-import { teaser } from '@/lib/server/market';
+import { markets24h } from '@/lib/server/market';
 import { listCalls } from '@/lib/server/store';
 
 export const dynamic = 'force-dynamic';
@@ -20,7 +20,7 @@ const STEPS = [
 ] as const;
 
 export default async function Home() {
-  const t = await teaser();
+  const markets = await markets24h();
   const activity = listCalls(undefined, 8);
   return (
     <>
@@ -35,26 +35,7 @@ export default async function Home() {
           <p className="mt-6 flex items-center gap-1.5 text-sm text-faint"><FlaskConical size={14} strokeWidth={1.75} aria-hidden /> New desks get 2 test USDT. Whitechain Sepolia testnet.</p>
         </div>
 
-        <div className="card overflow-hidden">
-          <div className="flex items-baseline justify-between border-b border-line px-5 py-3">
-            <p className="text-sm font-semibold">Markets</p>
-            <p className="text-xs text-faint">Binance spot, 24h. Full data $0.001 per request.</p>
-          </div>
-          <table className="w-full text-sm">
-            <thead className="text-left text-faint"><tr><th className="px-5 py-2">Asset</th><th className="py-2 text-right">Price</th><th className="py-2 text-right">24h</th><th className="hidden py-2 text-right sm:table-cell">Volume</th><th className="px-5 py-2 text-right">24h chart</th></tr></thead>
-            <tbody>
-              {t.prices.slice(0, 8).map(p => (
-                <tr key={p.symbol} className="border-t border-line">
-                  <td className="px-5 py-2.5 font-medium">{p.symbol}</td>
-                  <td className="num py-2.5 text-right">${px(p.price)}</td>
-                  <td className={`num py-2.5 text-right ${p.change24h >= 0 ? 'up' : 'down'}`}>{p.change24h >= 0 ? '+' : ''}{p.change24h.toFixed(2)}%</td>
-                  <td className="num hidden py-2.5 text-right text-dim sm:table-cell">{big(p.volume24h)}</td>
-                  <td className="px-5 py-1.5 text-right"><span className="inline-block"><Sparkline points={p.line} change={p.change24h} /></span></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <MarketsTable initial={markets} />
       </section>
 
       <section className="border-y border-line bg-ink-2">
