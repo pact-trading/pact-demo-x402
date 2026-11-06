@@ -8,7 +8,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { createSightline, usdt } from './sightline.js';
 
-const question = process.argv.slice(2).filter(a => a !== '--').join(' ') || 'Which of ETH, SOL and ARB is smart money accumulating right now, and is it a good entry?';
+const question = process.argv.slice(2).filter(a => a !== '--').join(' ') || 'Which of ETH, SOL and ARB has the strongest buying right now, and is it a good entry?';
 const sightline = createSightline();
 const client = new Anthropic();
 
@@ -16,11 +16,11 @@ const token = { type: 'string', description: 'Ticker, e.g. ETH, SOL, BTC, ARB' }
 const tools: Anthropic.Beta.BetaTool[] = [
   { name: 'get_prices', description: 'Spot price, 24h change and volume. Costs $0.001 per call. Pass several symbols in one call.', strict: true,
     input_schema: { type: 'object', properties: { symbols: { type: 'array', items: { type: 'string' }, description: 'Tickers' } }, required: ['symbols'], additionalProperties: false } },
-  { name: 'get_news', description: 'Recent market headlines with sentiment (-1..1) and impact. Costs $0.005 per call.', strict: true,
+  { name: 'get_news', description: 'Latest headlines from CoinDesk, Cointelegraph and Decrypt mentioning the token, with sentiment (-1..1) and impact. Costs $0.005 per call.', strict: true,
     input_schema: { type: 'object', properties: { token }, required: ['token'], additionalProperties: false } },
-  { name: 'get_smart_money', description: 'Net 24h/7d flows from labelled funds, market makers and top traders, plus the largest wallets. Costs $0.02 per call.', strict: true,
+  { name: 'get_order_flow', description: 'Binance Futures order flow: net taker buy minus sell (24h, 7d), open interest and its 24h change, funding rate, share of top trader accounts that are long, and the largest recent trades. Costs $0.02 per call.', strict: true,
     input_schema: { type: 'object', properties: { token }, required: ['token'], additionalProperties: false } },
-  { name: 'get_insight', description: 'Full token report: 0-100 score, signal, thesis, holder concentration, funding, risks. Costs $0.05 per call; use it only for the tokens you will recommend.', strict: true,
+  { name: 'get_insight', description: 'Full token report built from prices, order flow and news: 0-100 score with its parts, signal, thesis, 7d change, volatility, risks. Costs $0.05 per call; use it only for the tokens you will recommend.', strict: true,
     input_schema: { type: 'object', properties: { token }, required: ['token'], additionalProperties: false } },
 ];
 
@@ -29,7 +29,7 @@ async function run(name: string, input: Record<string, unknown>) {
   switch (name) {
     case 'get_prices': return sightline.prices((input.symbols as string[]) ?? []);
     case 'get_news': return sightline.news(t, 6);
-    case 'get_smart_money': return sightline.smartMoney(t);
+    case 'get_order_flow': return sightline.orderFlow(t);
     case 'get_insight': return sightline.insight(t);
     default: throw new Error(`unknown tool ${name}`);
   }

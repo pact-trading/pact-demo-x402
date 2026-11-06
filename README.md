@@ -5,14 +5,18 @@ way Nansen does, but with no subscription: each API call is one **x402** payment
 Whitechain Sepolia. **Pact** is the facilitator. It verifies each payment, settles it onchain and
 pays the gas. Sightline only uses Pact's public x402 endpoints and its `X402AgentAccount` contracts.
 
-| Endpoint | Price | Data |
-| --- | --- | --- |
-| `GET /api/v1/prices?symbols=BTC,ETH` | $0.001 | Spot price, 24h change, volume (live from CoinGecko) |
-| `GET /api/v1/news?token=SOL` | $0.005 | Scored market wire |
-| `GET /api/v1/smart-money?token=ETH` | $0.02 | Net flows from labelled wallets, top wallets |
-| `GET /api/v1/insight?token=SOL` | $0.05 | 0–100 score, signal, thesis, risks |
+| Endpoint | Price | Data | Provider underneath |
+| --- | --- | --- | --- |
+| `GET /api/v1/prices?symbols=BTC,ETH` | $0.001 | Price, 24h change, range, volume, market cap | Binance Spot, CoinGecko (market cap, fallback) |
+| `GET /api/v1/news?token=SOL` | $0.005 | Latest headlines tagged with tokens, sentiment, impact | CoinDesk, Cointelegraph, Decrypt RSS |
+| `GET /api/v1/smart-money?token=ETH` | $0.02 | Net taker flow 24h/7d, open interest, funding, top trader positioning, large trades | Binance USDⓈ-M Futures |
+| `GET /api/v1/insight?token=SOL` | $0.05 | 0 to 100 score with its parts, signal, thesis, risks | All of the above |
 
-Only the prices are real. News, flows and reports are modelled data, so the demo has no data licence.
+Every paid request reads the providers live (`lib/server/providers/`), with a short cache so one
+request never fans out into many upstream calls, and stale data served if a provider is briefly
+down. `GET /api/providers` shows each provider's health, latency and call count. All providers are
+public endpoints and need no API key. Sentiment is a keyword score; the insight score is a
+transparent formula, returned with its parts.
 
 ## How a buyer pays
 
@@ -66,6 +70,7 @@ Pages: `/` landing, `/desk` (open a desk, top up, limits, revoke, the agent's `.
 cd agent && pnpm install
 pnpm setup                                     # opens a desk headless, writes .env, 2 test USDT
 pnpm watch --tokens ETH,SOL --every 60         # rule-based watcher, pays per call, no LLM
+pnpm smoke                                     # one paid call to each dataset
 ANTHROPIC_API_KEY=… pnpm ask "Is smart money accumulating SOL?"   # Claude buys the data it needs
 ```
 

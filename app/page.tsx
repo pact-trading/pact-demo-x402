@@ -38,7 +38,7 @@ export default async function Home() {
         <div className="card overflow-hidden">
           <div className="flex items-baseline justify-between border-b border-line px-5 py-3">
             <p className="text-sm font-semibold">Markets</p>
-            <p className="text-xs text-faint">Delayed 15 min. Live data $0.001 per request.</p>
+            <p className="text-xs text-faint">Binance spot, 24h. Full data $0.001 per request.</p>
           </div>
           <table className="w-full text-sm">
             <thead className="text-left text-faint"><tr><th className="px-5 py-2">Asset</th><th className="py-2 text-right">Price</th><th className="py-2 text-right">24h</th><th className="hidden py-2 text-right sm:table-cell">Volume</th><th className="px-5 py-2 text-right">24h chart</th></tr></thead>
@@ -49,7 +49,7 @@ export default async function Home() {
                   <td className="num py-2.5 text-right">${px(p.price)}</td>
                   <td className={`num py-2.5 text-right ${p.change24h >= 0 ? 'up' : 'down'}`}>{p.change24h >= 0 ? '+' : ''}{p.change24h.toFixed(2)}%</td>
                   <td className="num hidden py-2.5 text-right text-dim sm:table-cell">{big(p.volume24h)}</td>
-                  <td className="px-5 py-1.5 text-right"><span className="inline-block"><Sparkline seed={p.symbol} change={p.change24h} /></span></td>
+                  <td className="px-5 py-1.5 text-right"><span className="inline-block"><Sparkline points={p.line} change={p.change24h} /></span></td>
                 </tr>
               ))}
             </tbody>
@@ -59,7 +59,7 @@ export default async function Home() {
 
       <section className="border-y border-line bg-ink-2">
         <div className="mx-auto grid max-w-7xl grid-cols-2 gap-6 px-5 py-6 text-sm sm:grid-cols-4">
-          {([[Tags, '4,213', 'labelled wallets tracked'], [Building2, '612', 'funds and market makers'], [Coins, '20', 'assets covered'], [Timer, '~2 s', 'to settle a payment']] as const).map(([Icon, n, l]) => (
+          {([[Tags, '4', 'live data providers'], [Building2, '3', 'newsrooms in the wire'], [Coins, '20', 'assets covered'], [Timer, '~2 s', 'to settle a payment']] as const).map(([Icon, n, l]) => (
             <div key={l} className="flex items-start gap-3"><Icon size={18} strokeWidth={1.75} className="mt-1 text-faint" aria-hidden /><div><p className="num text-xl font-medium">{n}</p><p className="text-dim">{l}</p></div></div>
           ))}
         </div>

@@ -9,8 +9,8 @@ import { explorer, short, usd } from '@/lib/chain';
 import { loadDesk, paidFetch, reason, type Desk } from '@/lib/client/vault';
 
 type Prices = { prices: Array<{ symbol: string; price: number; change24h: number; volume24h: number }> };
-type News = { items: Array<{ id: string; headline: string; source: string; sentiment: number; impact: string; tokens: string[]; publishedAt: string }> };
-type Flows = { token: string; netFlowUsd24h: number; netFlowUsd7d: number; exchangeNetflowUsd24h: number; buyers: number; sellers: number; topWallets: Array<{ address: string; entity: string; label: string; side: string; usd: number; at: string }> };
+type News = { items: Array<{ id: string; headline: string; url: string; source: string; sentiment: number; impact: string; tokens: string[]; publishedAt: string }> };
+type Flows = { token: string; netTakerFlowUsd24h: number; netTakerFlowUsd7d: number; openInterestUsd: number; openInterestChange24hPct: number; fundingRate8h: number; topTraderLongPct: number; largeTradeThresholdUsd: number; largeTrades: Array<{ side: 'buy' | 'sell'; usd: number; price: number; size: number; at: string }>; source: string };
 type Insight = { token: string; score: number; signal: string; thesis: string; metrics: Record<string, number>; risks: string[]; price: { price: number; change24h: number } | null };
 type Receipt = { endpoint: string; tx: string | null; price: string; at: string };
 
@@ -71,25 +71,37 @@ export default function Terminal() {
       <div className="mt-6 grid gap-4 lg:grid-cols-3">
         <section className="card p-5 lg:col-span-2">
           <div className="flex items-center justify-between">
-            <div><p className="flex items-center gap-2 font-semibold"><DatasetIcon id="smart-money" /> Smart money: {token}</p><p className="text-xs text-dim">4,213 labelled wallets, last 24h</p></div>
+            <div><p className="flex items-center gap-2 font-semibold"><DatasetIcon id="smart-money" /> Order flow: {token}</p><p className="text-xs text-dim">Binance Futures, live</p></div>
             <Buy id="smart-money" label={flows ? 'Refresh' : 'Unlock'} onClick={() => buy<Flows>('smart-money', `?token=${token}`, setFlows)} />
           </div>
           <div className={`mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4 ${flows ? '' : 'blur-lock'}`}>
-            {[['Net flow 24h', flows ? m(flows.netFlowUsd24h) : '+$24.1M', flows ? flows.netFlowUsd24h >= 0 : true], ['Net flow 7d', flows ? m(flows.netFlowUsd7d) : '+$80.2M', flows ? flows.netFlowUsd7d >= 0 : true], ['Exchange netflow', flows ? m(flows.exchangeNetflowUsd24h) : '-$9.4M', flows ? flows.exchangeNetflowUsd24h <= 0 : true], ['Buyers / sellers', flows ? `${flows.buyers} / ${flows.sellers}` : '142 / 77', true]].map(([k, v, good]) => (
-              <div key={String(k)} className="rounded-md bg-ink-2 p-3"><p className="text-xs text-dim">{k}</p><p className={`num mt-1 text-lg font-semibold ${good ? 'up' : 'down'}`}>{v}</p></div>
+            {([
+              ['Net taker flow 24h', flows ? m(flows.netTakerFlowUsd24h) : '+$24.1M', flows ? flows.netTakerFlowUsd24h >= 0 : true],
+              ['Net taker flow 7d', flows ? m(flows.netTakerFlowUsd7d) : '+$80.2M', flows ? flows.netTakerFlowUsd7d >= 0 : true],
+              ['Open interest 24h', flows ? `${flows.openInterestChange24hPct >= 0 ? '+' : ''}${flows.openInterestChange24hPct.toFixed(2)}%` : '+1.8%', flows ? flows.openInterestChange24hPct >= 0 : true],
+              ['Top traders long', flows ? `${flows.topTraderLongPct}%` : '62.4%', flows ? flows.topTraderLongPct >= 50 : true],
+            ] as const).map(([k, v, good]) => (
+              <div key={k} className="rounded-md bg-ink-2 p-3"><p className="text-xs text-dim">{k}</p><p className={`num mt-1 text-lg font-semibold ${good ? 'up' : 'down'}`}>{v}</p></div>
             ))}
           </div>
-          <table className={`mt-5 w-full text-sm ${flows ? '' : 'blur-lock'}`}>
-            <thead className="text-left text-xs text-dim"><tr><th className="pb-2 font-medium">Wallet</th><th className="pb-2 font-medium">Label</th><th className="pb-2 font-medium">Side</th><th className="pb-2 text-right font-medium">Size</th></tr></thead>
+          <div className={`mt-4 flex flex-wrap gap-x-6 gap-y-1 text-xs text-dim ${flows ? '' : 'blur-lock'}`}>
+            <span>Open interest <span className="num text-fg">{flows ? `$${(flows.openInterestUsd / 1e6).toFixed(0)}M` : '$5,294M'}</span></span>
+            <span>Funding per 8h <span className="num text-fg">{flows ? `${(flows.fundingRate8h * 100).toFixed(4)}%` : '0.0100%'}</span></span>
+            <span>Large trade from <span className="num text-fg">{flows ? `$${(flows.largeTradeThresholdUsd / 1000).toFixed(0)}k` : '$120k'}</span></span>
+          </div>
+          <table className={`mt-4 w-full text-sm ${flows ? '' : 'blur-lock'}`}>
+            <thead className="text-left text-xs text-dim"><tr><th className="pb-2 font-medium">Time</th><th className="pb-2 font-medium">Side</th><th className="pb-2 text-right font-medium">Price</th><th className="pb-2 text-right font-medium">Size</th><th className="pb-2 text-right font-medium">Value</th></tr></thead>
             <tbody>
-              {(flows?.topWallets ?? Array.from({ length: 5 }, (_, i) => ({ address: `0x${'a'.repeat(40)}`, entity: 'Northwind Capital', label: 'Fund', side: i % 2 ? 'sell' : 'buy', usd: 4_200_000, at: '' }))).slice(0, 6).map((w, i) => (
+              {(flows?.largeTrades ?? Array.from({ length: 5 }, (_, i) => ({ side: (i % 2 ? 'sell' : 'buy') as 'buy' | 'sell', usd: 420_000, price: 2230, size: 188, at: new Date().toISOString() }))).slice(0, 8).map((t, i) => (
                 <tr key={i} className="border-t border-line">
-                  <td className="py-2"><p className="font-medium">{w.entity}</p><p className="num text-xs text-faint">{short(w.address)}</p></td>
-                  <td className="py-2 text-dim">{w.label}</td>
-                  <td className={`py-2 font-semibold ${w.side === 'buy' ? 'up' : 'down'}`}>{w.side}</td>
-                  <td className="num py-2 text-right">${(w.usd / 1e6).toFixed(2)}M</td>
+                  <td className="num py-2 text-dim">{new Date(t.at).toLocaleTimeString()}</td>
+                  <td className={`py-2 font-medium ${t.side === 'buy' ? 'up' : 'down'}`}>{t.side === 'buy' ? 'Buy' : 'Sell'}</td>
+                  <td className="num py-2 text-right">${px(t.price)}</td>
+                  <td className="num py-2 text-right text-dim">{t.size.toLocaleString(undefined, { maximumFractionDigits: 2 })} {token}</td>
+                  <td className="num py-2 text-right">${(t.usd / 1000).toFixed(0)}k</td>
                 </tr>
               ))}
+              {flows && !flows.largeTrades.length && <tr><td colSpan={5} className="py-6 text-center text-dim">No large trades in the latest 1,000.</td></tr>}
             </tbody>
           </table>
         </section>
@@ -104,13 +116,13 @@ export default function Terminal() {
               <p className="num text-5xl font-semibold">{insight?.score ?? 72}</p>
               <span className={`chip mb-2 !text-sm ${insight?.signal === 'distribute' ? '!border-rose/50 !text-rose' : insight?.signal === 'neutral' ? '!text-amber' : '!border-mint/50 !text-mint'}`}>{insight?.signal ?? 'accumulate'}</span>
             </div>
-            <p className="mt-3 text-sm leading-relaxed text-dim">{insight?.thesis ?? 'Smart money added size while exchange balances fell. Funding is flat, so the move is spot-led rather than leverage-led.'}</p>
+            <p className="mt-3 text-sm leading-relaxed text-dim">{insight?.thesis ?? 'Takers bought more than they sold over 24h and open interest is up. Funding shows leverage is not stretched.'}</p>
             <dl className="mt-4 space-y-1.5 text-sm">
-              {[['Top 10 holders', insight ? `${insight.metrics.top10HolderPct}%` : '31%'], ['Funding (8h)', insight ? `${(insight.metrics.fundingRate8h * 100).toFixed(2)}%` : '0.01%'], ['Active addresses', insight ? `${insight.metrics.activeAddressesChangePct}%` : '+6%']].map(([k, v]) => (
+              {[['7d change', insight ? `${insight.metrics.change7dPct}%` : '+4.2%'], ['Volatility', insight ? `${insight.metrics.volatilityAnnualPct}%` : '48%'], ['Top traders long', insight ? `${insight.metrics.topTraderLongPct}%` : '61%'], ['Funding (8h)', insight ? `${(insight.metrics.fundingRate8h * 100).toFixed(4)}%` : '0.0100%'], ['News sentiment', insight ? String(insight.metrics.newsSentiment) : '0.21']].map(([k, v]) => (
                 <div key={k} className="flex justify-between"><dt className="text-dim">{k}</dt><dd className="num">{v}</dd></div>
               ))}
             </dl>
-            <ul className="mt-4 space-y-1 text-xs text-faint">{(insight?.risks ?? ['Supply broadly distributed']).map(r => <li key={r} className="flex items-center gap-1.5"><TriangleAlert size={12} strokeWidth={1.75} aria-hidden /> {r}</li>)}</ul>
+            <ul className="mt-4 space-y-1 text-xs text-faint">{(insight?.risks ?? ['Top trader positioning is balanced']).map(r => <li key={r} className="flex items-center gap-1.5"><TriangleAlert size={12} strokeWidth={1.75} aria-hidden /> {r}</li>)}</ul>
           </div>
         </section>
 
@@ -140,11 +152,11 @@ export default function Terminal() {
             {(news?.items ?? []).map(n => (
               <li key={n.id} className="flex items-start gap-3 py-3">
                 <span className={`num mt-0.5 w-12 shrink-0 text-xs font-semibold ${n.sentiment >= 0 ? 'up' : 'down'}`}>{n.sentiment >= 0 ? '+' : ''}{n.sentiment.toFixed(2)}</span>
-                <div className="flex-1"><p className="text-sm">{n.headline}</p><p className="mt-0.5 text-xs text-faint">{n.source}, {new Date(n.publishedAt).toLocaleTimeString()}, {n.impact} impact</p></div>
+                <div className="flex-1"><a href={n.url} target="_blank" rel="noreferrer" className="text-sm hover:underline">{n.headline}</a><p className="mt-0.5 text-xs text-faint">{n.source}, {new Date(n.publishedAt).toLocaleTimeString()}, {n.impact} impact</p></div>
                 {n.tokens.map(t => <button key={t} onClick={() => setToken(t)} className="chip hover:text-fg">{t}</button>)}
               </li>
             ))}
-            {!news && <li className="py-8 text-center text-sm text-dim">Ten scored headlines, $0.005 a load.</li>}
+            {!news && <li className="py-8 text-center text-sm text-dim">Ten latest headlines from three newsrooms, $0.005 a load.</li>}
           </ul>
         </section>
       </div>

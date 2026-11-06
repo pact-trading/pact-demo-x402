@@ -47,7 +47,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <p className="font-semibold text-fg">Payments</p>
               <a href="https://pay.pactagent.app" className="block hover:text-fg">Powered by Pact</a>
               <Link href="/merchant" className="block hover:text-fg">Revenue dashboard</Link>
-              <p className="text-faint">Whitechain Sepolia testnet. Test USDT only. Spot prices from CoinGecko; other datasets are modelled.</p>
+              <p className="text-faint">Whitechain Sepolia testnet, test USDT only. Data from Binance, CoinGecko, CoinDesk, Cointelegraph and Decrypt.</p>
             </div>
           </div>
         </footer>

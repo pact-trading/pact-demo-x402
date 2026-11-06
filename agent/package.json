@@ -8,6 +8,7 @@
     "setup": "tsx src/setup.ts",
     "watch": "tsx src/watch.ts",
     "ask": "tsx src/agent.ts",
+    "smoke": "tsx --env-file=.env src/smoke.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

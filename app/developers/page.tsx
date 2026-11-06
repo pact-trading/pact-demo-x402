@@ -1,4 +1,8 @@
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, CircleCheck, CircleDashed, CircleX } from 'lucide-react';
+import { providerStatus } from '@/lib/server/providers/http';
+import '@/lib/server/providers/binance';
+import '@/lib/server/providers/coingecko';
+import '@/lib/server/providers/news';
 import { DatasetIcon } from '@/components/dataset-icon';
 import Link from 'next/link';
 import { ENDPOINTS } from '@/lib/catalog';
@@ -6,12 +10,15 @@ import { usd } from '@/lib/chain';
 
 const Code = ({ children }: { children: string }) => <pre className="num overflow-x-auto rounded-md border border-line bg-ink p-4 text-[12.5px] leading-relaxed text-dim">{children}</pre>;
 
+export const dynamic = 'force-dynamic';
+
 export default function Developers() {
+  const providers = providerStatus();
   return (
     <div className="mx-auto grid max-w-7xl gap-10 px-5 py-14 lg:grid-cols-[220px_1fr]">
       <aside className="hidden lg:block">
         <nav className="sticky top-24 space-y-2 text-sm text-dim">
-          {[['How paying works', '#flow'], ['Endpoints', '#endpoints'], ['AI agent quickstart', '#agent'], ['Any x402 client', '#client'], ['Limits and errors', '#limits']].map(([l, h]) => <a key={h} href={h} className="block hover:text-fg">{l}</a>)}
+          {[['How paying works', '#flow'], ['Endpoints', '#endpoints'], ['Data sources', '#sources'], ['AI agent quickstart', '#agent'], ['Any x402 client', '#client'], ['Limits and errors', '#limits']].map(([l, h]) => <a key={h} href={h} className="block hover:text-fg">{l}</a>)}
         </nav>
       </aside>
       <div className="min-w-0 space-y-16">
@@ -46,6 +53,25 @@ export default function Developers() {
           </div>
         </section>
 
+        <section id="sources">
+          <h2 className="text-2xl font-semibold">Data sources</h2>
+          <p className="mt-2 max-w-2xl text-sm text-dim">Every paid response is built at request time from these upstream providers, cached for a few seconds to a few minutes. Live status: <a className="num text-mint" href="/api/providers">GET /api/providers</a></p>
+          <div className="card mt-5 overflow-x-auto"><table className="w-full min-w-[560px] text-sm">
+            <thead className="text-left text-faint"><tr><th className="px-5 py-3">Provider</th><th className="py-3">Source</th><th className="py-3">Status</th><th className="py-3 text-right">Latency</th><th className="px-5 py-3 text-right">Calls</th></tr></thead>
+            <tbody>
+              {providers.map(p => (
+                <tr key={p.id} className="border-t border-line">
+                  <td className="px-5 py-3 font-medium">{p.name}</td>
+                  <td className="py-3 text-dim">{p.source}</td>
+                  <td className="py-3"><span className={`inline-flex items-center gap-1.5 ${p.ok === false ? 'text-rose' : p.ok ? 'text-gain' : 'text-faint'}`}>{p.ok === false ? <CircleX size={14} aria-hidden /> : p.ok ? <CircleCheck size={14} aria-hidden /> : <CircleDashed size={14} aria-hidden />}{p.ok === false ? p.lastError : p.ok ? 'Healthy' : 'Not called yet'}</span></td>
+                  <td className="num py-3 text-right text-dim">{p.latencyMs === null ? '' : `${p.latencyMs} ms`}</td>
+                  <td className="num px-5 py-3 text-right text-dim">{p.calls}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table></div>
+        </section>
+
         <section id="agent">
           <h2 className="text-2xl font-semibold">AI agent quickstart</h2>
           <p className="mt-2 max-w-2xl text-sm text-dim">The sample agent in <span className="num text-fg">agent/</span> is a trading research analyst built on Claude. Each tool is a paid Sightline endpoint, so it decides what data is worth buying. It also ships a no-LLM watcher.</p>
@@ -61,7 +87,7 @@ pnpm watch -- --tokens ETH,SOL --every 60
 
 # 3. Ask Claude; it buys the data it needs
 export ANTHROPIC_API_KEY=…
-pnpm ask "Is smart money accumulating SOL?"`}</Code>
+pnpm ask "Is SOL seeing real buying?"`}</Code>
             <Code>{`import { createSightline } from './sightline.js';
 
 const sightline = createSightline({
@@ -71,7 +97,7 @@ const sightline = createSightline({
   maxPerCallUsdt: 0.10,                       // client-side guard
 });
 
-const flows = await sightline.smartMoney('SOL'); // pays $0.02
+const flow = await sightline.orderFlow('SOL');   // pays $0.02
 const report = await sightline.insight('SOL');   // pays $0.05
 console.log(report.signal, sightline.receipts);`}</Code>
           </div>

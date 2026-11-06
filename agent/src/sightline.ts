@@ -82,8 +82,8 @@ export function createSightline(cfg: SightlineConfig = configFromEnv()) {
     catalog: () => fetch(`${cfg.url}/api/v1`).then(r => r.json()) as Promise<{ endpoints: Array<{ path: string; name: string; priceUsdt: number }> }>,
     desk: () => fetch(`${cfg.url}/api/vault/${cfg.vault}`).then(r => r.json()) as Promise<{ balanceMinor: string; spentTodayMinor: string; dailyCapMinor: string; perCallCapMinor: string; status: string }>,
     prices: (symbols?: string[]) => get<{ prices: Array<{ symbol: string; price: number; change24h: number; volume24h: number }> }>('/api/v1/prices', { symbols: symbols?.join(',') }),
-    news: (token?: string, limit = 8) => get<{ items: Array<{ headline: string; sentiment: number; tokens: string[]; impact: string; publishedAt: string; source: string }> }>('/api/v1/news', { token, limit }),
-    smartMoney: (token: string) => get<{ token: string; netFlowUsd24h: number; netFlowUsd7d: number; exchangeNetflowUsd24h: number; buyers: number; sellers: number; topWallets: Array<{ entity: string; label: string; side: string; usd: number }> }>('/api/v1/smart-money', { token }),
+    news: (token?: string, limit = 8) => get<{ items: Array<{ headline: string; url: string; sentiment: number; tokens: string[]; impact: string; publishedAt: string; source: string }> }>('/api/v1/news', { token, limit }),
+    orderFlow: (token: string) => get<{ token: string; price: number; netTakerFlowUsd24h: number; netTakerFlowUsd7d: number; openInterestUsd: number; openInterestChange24hPct: number; fundingRate8h: number; topTraderLongPct: number; largeTrades: Array<{ side: 'buy' | 'sell'; usd: number; price: number; at: string }> }>('/api/v1/smart-money', { token }),
     insight: (token: string) => get<{ token: string; score: number; signal: string; thesis: string; metrics: Record<string, number>; risks: string[] }>('/api/v1/insight', { token }),
   };
 }
