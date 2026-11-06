@@ -10,18 +10,21 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^1.6.0",
+    "@ai-sdk/openai": "^4.0.109",
+    "@ai-sdk/react": "^4.0.167",
     "@x402/core": "2.29.0",
     "@x402/evm": "2.29.0",
     "@x402/fetch": "2.29.0",
     "@x402/hono": "2.29.0",
+    "ai": "^7.0.163",
     "hono": "^4.13.16",
     "lucide-react": "^1.69.0",
     "next": "15.5.6",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "server-only": "^0.0.1",
-    "viem": "^2.57.16"
+    "viem": "^2.57.16",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "4.1.14",

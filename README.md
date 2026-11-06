@@ -64,6 +64,16 @@ The buyer side is the official `@x402/fetch` client with a signer whose address 
 Pages: `/` landing, `/desk` (open a desk, top up, limits, revoke, the agent's `.env`), `/terminal`
 (buy each dataset), `/developers` (API and agent docs), `/merchant` (x402 revenue, every call linked to its transaction).
 
+## The chat analyst (`/chat`)
+
+The main way to use Sightline: ask in plain words. Built on the Vercel AI SDK (`ai`, `@ai-sdk/react`,
+`@ai-sdk/openai`). `app/api/chat/route.ts` streams the model's reply with `streamText`; the four tools
+have no server-side `execute`, so each tool call reaches the browser, which pays for it from the desk
+(x402, session key never leaves the browser), shows the charge and its transaction in the chat, and
+returns the data with `addToolOutput`. `useChat` sends the results back automatically.
+
+Set `OPENAI_API_KEY` (and optionally `OPENAI_MODEL`, default `gpt-5.4`) in `.env.local`.
+
 ## The AI agent (`agent/`)
 
 ```sh
