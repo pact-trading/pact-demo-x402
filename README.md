@@ -55,7 +55,7 @@ The buyer side is the official `@x402/fetch` client with a signer whose address 
    `pnpm exec tsx scripts/testnet/setup-merchant.ts --api http://127.0.0.1:3001 --origin http://localhost:3000 --name Sightline --email you@example.com --out ../../.runtime/testnet-local/x402-merchant.env`
 2. `cp .env.example .env.local`, then fill in the secret key, the merchant address and a relayer key
    holding a little WBT (about 0.01 WBT per desk) and some test USDT for the faucet.
-3. `pnpm install && pnpm build && pnpm start` → http://localhost:3240
+3. `pnpm install && pnpm dev` (Turbopack) → http://localhost:3240. For a production run: `pnpm build && pnpm start`.
 
 Pages: `/` landing, `/desk` (open a desk, top up, limits, revoke, the agent's `.env`), `/terminal`
 (buy each dataset), `/developers` (API and agent docs), `/merchant` (x402 revenue, every call linked to its transaction).
