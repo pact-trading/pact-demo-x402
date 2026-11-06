@@ -1,10 +1,10 @@
-/** A horizon line with a sighting notch: the "line" you read a market by. */
-export function Mark({ className = 'h-5 w-5' }: { className?: string }) {
+/** A lens and its line of sight. */
+export function Mark({ className = 'h-6 w-6' }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} aria-hidden>
-      <rect x="0.5" y="0.5" width="23" height="23" fill="var(--color-fg)" />
-      <path d="M3 15.5h7.2l1.8-7 1.8 7H21" fill="none" stroke="var(--color-ink-1)" strokeWidth="1.8" strokeLinejoin="miter" />
-      <circle cx="12" cy="7.2" r="1.6" fill="var(--color-mint)" />
+      <rect width="24" height="24" rx="6" fill="#111111" />
+      <circle cx="9.5" cy="12" r="4.25" fill="none" stroke="#FFFFFF" strokeWidth="2" />
+      <path d="M13.75 12H20" stroke="#4F7BFF" strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
 }
@@ -12,7 +12,7 @@ export function Logo() {
   return (
     <span className="flex items-center gap-2">
       <Mark />
-      <span className="text-[17px] font-semibold tracking-tight leading-none text-fg">Sightline</span>
+      <span className="text-[17px] font-semibold leading-none tracking-tight text-fg">Sightline</span>
     </span>
   );
 }
