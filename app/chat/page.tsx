@@ -5,16 +5,17 @@ import { DefaultChatTransport, lastAssistantMessageIsCompleteWithToolCalls } fro
 import { ArrowUp, ArrowUpRight, Bot, CircleCheck, CircleX, Loader2, Sparkles, Wallet } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { DatasetIcon } from '@/components/dataset-icon';
+import { ToolResult } from '@/components/tool-result';
 import { AGENT_TOOLS, toolByName } from '@/lib/agent-tools';
 import { ENDPOINTS } from '@/lib/catalog';
 import { explorer, short, usd } from '@/lib/chain';
 import { quickStartDesk } from '@/lib/client/quick-desk';
 import { loadDesk, paidFetch, reason, type Desk } from '@/lib/client/vault';
 
-type Receipt = { status: 'paying' | 'paid' | 'refused'; priceMinor: string; tx: string | null; error?: string };
+type Receipt = { status: 'paying' | 'paid' | 'refused'; priceMinor: string; tx: string | null; error?: string; data?: unknown };
 type ToolPart = { type: string; toolCallId: string; state: string; input?: Record<string, unknown>; errorText?: string };
 
-const SUGGESTIONS = ['Is SOL worth buying right now?', 'So sánh ETH và SOL hôm nay, nên giữ cái nào?', 'What is moving BTC today?', 'Are traders buying or selling ARB?'];
+const SUGGESTIONS = ['Is SOL worth buying right now?', 'Compare ETH and SOL today. Which one should I hold?', 'What is moving BTC today?', 'Are traders buying or selling ARB?'];
 const priceOf = (name: string) => ENDPOINTS.find(e => e.id === toolByName(name)?.endpoint)?.priceMinor ?? '0';
 const label = (name: string, input: Record<string, unknown> = {}) => `${name}(${Object.values(input).map(v => (Array.isArray(v) ? v.join(', ') : String(v))).join(', ')})`;
 const ERRORS: Record<string, string> = {
@@ -41,7 +42,8 @@ function CallCard({ name, input, receipt }: { name: string; input?: Record<strin
   const tool = toolByName(name);
   const r = receipt ?? { status: 'paying' as const, priceMinor: priceOf(name), tx: null };
   return (
-    <div className="flex items-center gap-3 rounded-md border border-line bg-ink-2 px-3 py-2 text-sm">
+    <div className="overflow-hidden rounded-md border border-line bg-ink-2">
+    <div className="flex items-center gap-3 px-3 py-2 text-sm">
       <span className="grid size-7 shrink-0 place-items-center rounded-md border border-line bg-white text-dim">{tool ? <DatasetIcon id={tool.endpoint} /> : <Bot size={15} aria-hidden />}</span>
       <span className="num min-w-0 flex-1 truncate text-dim">{label(name, input)}</span>
       {r.status === 'paying' && <span className="inline-flex items-center gap-1.5 text-faint"><Loader2 size={14} className="animate-spin" aria-hidden /> Paying {usd(r.priceMinor, 3)}</span>}
@@ -52,6 +54,8 @@ function CallCard({ name, input, receipt }: { name: string; input?: Record<strin
         </span>
       )}
       {r.status === 'refused' && <span className="inline-flex items-center gap-1.5 text-rose"><CircleX size={14} aria-hidden /> {r.error}</span>}
+    </div>
+    {r.status === 'paid' && tool && <ToolResult endpoint={tool.endpoint} data={r.data} tx={r.tx} explorer={explorer} />}
     </div>
   );
 }
@@ -79,7 +83,12 @@ export default function Chat() {
     transport,
     // After the browser has paid for every tool call in a step, send the results back automatically.
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
-    async onToolCall({ toolCall }) {
+    // Return at once and pay in the background, so every tool call in a step is paid in parallel.
+    onToolCall({ toolCall }) { void payFor(toolCall); },
+  });
+
+  async function payFor(toolCall: { toolName: string; toolCallId: string; input: unknown }) {
+    {
       const d = deskRef.current, tool = toolByName(toolCall.toolName);
       const priceMinor = priceOf(toolCall.toolName);
       const setReceipt = (r: Receipt) => setReceipts(all => ({ ...all, [toolCall.toolCallId]: r }));
@@ -92,7 +101,7 @@ export default function Chat() {
       const path = ENDPOINTS.find(e => e.id === tool.endpoint)!.path;
       try {
         const paid = await paidFetch<unknown>(d, `${path}${tool.query(toolCall.input as Record<string, unknown>)}`);
-        setReceipt({ status: 'paid', priceMinor, tx: paid.txHash });
+        setReceipt({ status: 'paid', priceMinor, tx: paid.txHash, data: paid.data });
         addToolOutput({ tool: toolCall.toolName, toolCallId: toolCall.toolCallId, output: paid.data } as never);
       } catch (e) {
         const why = reason(e);
@@ -100,12 +109,13 @@ export default function Chat() {
         addToolOutput({ tool: toolCall.toolName, toolCallId: toolCall.toolCallId, state: 'output-error', errorText: `Payment or request refused: ${why}` } as never);
       }
       void refreshBalance(d);
-    },
-  });
+    }
+  }
 
   useEffect(() => { const d = loadDesk(); deskRef.current = d; setDesk(d); setReady(true); void refreshBalance(d); }, []); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { bottom.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }); }, [messages, receipts]);
-  useEffect(() => { if (status === 'ready') void refreshBalance(); }, [status]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Balances settle a block later, so read again shortly after the answer finishes.
+  useEffect(() => { if (status === 'ready') { void refreshBalance(); const t = setTimeout(() => void refreshBalance(), 3000); return () => clearTimeout(t); } }, [status]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const busy = status === 'submitted' || status === 'streaming';
   const spent = Object.values(receipts).reduce((t, r) => t + (r.status === 'paid' ? Number(r.priceMinor) : 0), 0);
@@ -125,19 +135,6 @@ export default function Chat() {
   if (!ready) return null;
   return (
     <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-3xl flex-col px-5">
-      <div className="flex items-center justify-between gap-3 border-b border-line py-4">
-        <div className="flex items-center gap-2.5">
-          <span className="grid size-8 place-items-center rounded-md bg-fg text-white"><Sparkles size={16} strokeWidth={1.75} aria-hidden /></span>
-          <div><p className="font-semibold leading-tight">Sightline analyst</p><p className="text-xs text-dim">Buys live market data per question, pays from your desk</p></div>
-        </div>
-        {desk && (
-          <div className="flex items-center gap-2 text-sm">
-            <span className="chip"><Wallet size={12} strokeWidth={1.75} aria-hidden /> {balance === null ? '…' : usd(balance)} USDT</span>
-            {spent > 0 && <span className="chip">This chat {usd(spent, 3)}</span>}
-          </div>
-        )}
-      </div>
-
       <div className="flex-1 space-y-4 py-6">
         {!messages.length && (
           <div className="py-10 text-center">
@@ -190,7 +187,7 @@ export default function Chat() {
             className="max-h-40 min-h-[40px] flex-1 resize-none bg-transparent px-2 py-2 text-[15px] outline-none" />
           <button type="submit" disabled={!desk || busy || !input.trim()} aria-label="Send" className="btn btn-mint !p-2.5"><ArrowUp size={16} aria-hidden /></button>
         </div>
-        <p className="mt-2 text-center text-xs text-faint">Each data call is paid from your desk within its limits. Research, not financial advice.</p>
+        <p className="mt-2 text-center text-xs text-faint">{spent > 0 ? `This chat spent ${usd(spent, 3)} from your desk${balance === null ? '' : `, ${usd(balance)} left`}. ` : 'Each data call is paid from your desk within its limits. '}Research, not financial advice.</p>
       </form>
     </div>
   );
