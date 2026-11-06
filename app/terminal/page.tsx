@@ -85,7 +85,7 @@ export default function Terminal() {
             ))}
           </div>
           <div className={`mt-4 flex flex-wrap gap-x-6 gap-y-1 text-xs text-dim ${flows ? '' : 'blur-lock'}`}>
-            <span>Open interest <span className="num text-fg">{flows ? `$${(flows.openInterestUsd / 1e6).toFixed(0)}M` : '$5,294M'}</span></span>
+            <span>Open interest <span className="num text-fg">{flows ? (flows.openInterestUsd >= 1e9 ? `$${(flows.openInterestUsd / 1e9).toFixed(2)}B` : `$${(flows.openInterestUsd / 1e6).toFixed(0)}M`) : '$5.29B'}</span></span>
             <span>Funding per 8h <span className="num text-fg">{flows ? `${(flows.fundingRate8h * 100).toFixed(4)}%` : '0.0100%'}</span></span>
             <span>Large trade from <span className="num text-fg">{flows ? `$${(flows.largeTradeThresholdUsd / 1000).toFixed(0)}k` : '$120k'}</span></span>
           </div>
