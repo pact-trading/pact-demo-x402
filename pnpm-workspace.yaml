@@ -1,3 +1,6 @@
+# @pactagent/* releases are new; let pnpm install them before the minimum release age passes.
+minimumReleaseAgeExclude:
+  - '@pactagent/*'
 allowBuilds:
   sharp: true
   '@tailwindcss/oxide': true

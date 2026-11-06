@@ -14,6 +14,9 @@ importers:
       '@ai-sdk/react':
         specifier: ^4.0.167
         version: 4.0.167(react@19.3.1)(zod@4.6.7)
+      '@pactagent/node':
+        specifier: ^0.1.0
+        version: 0.1.0(typescript@5.9.3)(zod@4.6.7)
       '@x402/core':
         specifier: 2.29.0
         version: 2.29.0
@@ -369,6 +372,14 @@ packages:
   '@opentelemetry/api@1.10.0':
     resolution: {integrity: sha512-lMkyes8iHrG+mk6WH7X70MdCLI2RS0FwNBY1PyQ8UemaijE2m5mv5A0Niy3HtbYTFrgkUEQjFMXmSAk2hQDuPQ==}
     engines: {node: '>=8.0.0'}
+
+  '@pactagent/core@0.1.0':
+    resolution: {integrity: sha512-RUiMtHAiLuc45ZwCEmUZEZ7jfAiqPWObafOj89Xy1WCQJqAY+mBHojtCtsUacEyAukLTzn0/QclBs9Xf/Aj/4w==}
+    engines: {node: '>=20'}
+
+  '@pactagent/node@0.1.0':
+    resolution: {integrity: sha512-Aqg5uaFhTb1BpLN3ydneA6ZJjbJdjF0nsVueg7rBKRe+XmpVcJ7VmDXZ3eydi4NVHrz8fv0xlxwDY8+hFGqL3g==}
+    engines: {node: '>=20'}
 
   '@scure/base@1.2.6':
     resolution: {integrity: sha512-g/nm5FgUa//MCj1gV09zTJTaM6KBAHqLN907YVQqf7zC49+DcO4B1so4ZX07Ef10Twr6nuqYEH9GEggFXA4Fmg==}
@@ -1113,6 +1124,26 @@ snapshots:
 
   '@opentelemetry/api@1.10.0':
     optional: true
+
+  '@pactagent/core@0.1.0(typescript@5.9.3)(zod@4.6.7)':
+    dependencies:
+      viem: 2.57.16(typescript@5.9.3)(zod@4.6.7)
+    transitivePeerDependencies:
+      - bufferutil
+      - mppx
+      - typescript
+      - utf-8-validate
+      - zod
+
+  '@pactagent/node@0.1.0(typescript@5.9.3)(zod@4.6.7)':
+    dependencies:
+      '@pactagent/core': 0.1.0(typescript@5.9.3)(zod@4.6.7)
+    transitivePeerDependencies:
+      - bufferutil
+      - mppx
+      - typescript
+      - utf-8-validate
+      - zod
 
   '@scure/base@1.2.6': {}
 

@@ -1,23 +1,20 @@
 import { NextResponse } from 'next/server';
+import { createPactNodeClient } from '@pactagent/node';
 
 export const dynamic = 'force-dynamic';
 
+const noStore = { headers: { 'Cache-Control': 'no-store' } };
+
 /** Expose only the merchant's current logo; the Pact API key stays on this server. */
 export async function GET() {
-  const base = process.env.PACT_API_URL ?? 'https://api.pactagent.app';
-  const key = process.env.PACT_SECRET_KEY;
-  if (!key) return NextResponse.json({ logoUrl: null }, { headers: { 'Cache-Control': 'no-store' } });
+  const apiKey = process.env.PACT_SECRET_KEY;
+  if (!apiKey) return NextResponse.json({ logoUrl: null }, noStore);
 
   try {
-    const response = await fetch(`${base.replace(/\/$/, '')}/v1/settings`, {
-      headers: { Authorization: `Bearer ${key}` },
-      cache: 'no-store',
-      signal: AbortSignal.timeout(5000),
-    });
-    if (!response.ok) throw new Error('Brand unavailable');
-    const settings = (await response.json()) as { logoUrl?: string | null };
-    return NextResponse.json({ logoUrl: settings.logoUrl ?? null }, { headers: { 'Cache-Control': 'no-store' } });
+    const pact = createPactNodeClient({ apiKey, baseUrl: process.env.PACT_API_URL ?? 'https://api.pactagent.app' });
+    const settings = await pact.settings.get({ signal: AbortSignal.timeout(5000) });
+    return NextResponse.json({ logoUrl: settings.logoUrl ?? null }, noStore);
   } catch {
-    return NextResponse.json({ logoUrl: null }, { headers: { 'Cache-Control': 'no-store' } });
+    return NextResponse.json({ logoUrl: null }, noStore);
   }
 }
