@@ -1,0 +1,33 @@
+{
+  "name": "pact-demo-x402",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "next dev --port 3240",
+    "build": "next build",
+    "start": "next start --port 3240",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@x402/core": "2.29.0",
+    "@x402/evm": "2.29.0",
+    "@x402/fetch": "2.29.0",
+    "@x402/hono": "2.29.0",
+    "hono": "^4.13.16",
+    "next": "15.5.6",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "server-only": "^0.0.1",
+    "viem": "^2.57.16"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.1.14",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "postcss": "8.5.6",
+    "tailwindcss": "4.1.14",
+    "typescript": "^5.9.3"
+  }
+}

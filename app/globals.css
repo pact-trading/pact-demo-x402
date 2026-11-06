@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #070A0F;
+  --color-ink-1: #0B1017;
+  --color-ink-2: #111823;
+  --color-ink-3: #182230;
+  --color-line: #1E2A3A;
+  --color-fg: #E8EEF6;
+  --color-dim: #8A97AB;
+  --color-faint: #5B687C;
+  --color-mint: #5EF2B8;
+  --color-mint-dim: #2BBF8A;
+  --color-rose: #FF6B81;
+  --color-amber: #FFC857;
+  --color-violet: #9B8CFF;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-mono-face), ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+html { background: var(--color-ink); color: var(--color-fg); color-scheme: dark; }
+body { font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
+.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.card { background: var(--color-ink-1); border: 1px solid var(--color-line); border-radius: 16px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; border-radius: 10px; padding: .65rem 1.1rem; font-weight: 600; font-size: .9rem; transition: background .15s, color .15s, border-color .15s, opacity .15s; white-space: nowrap; }
+.btn-mint { background: var(--color-mint); color: #04130D; }
+.btn-mint:hover { background: #8AF7CC; }
+.btn-ghost { border: 1px solid var(--color-line); color: var(--color-fg); background: var(--color-ink-2); }
+.btn-ghost:hover { border-color: #2C3B50; }
+.btn:disabled { opacity: .5; cursor: progress; }
+.chip { display: inline-flex; align-items: center; gap: .35rem; border-radius: 999px; padding: .15rem .6rem; font-size: .72rem; font-weight: 600; border: 1px solid var(--color-line); color: var(--color-dim); }
+.input { width: 100%; background: var(--color-ink-2); border: 1px solid var(--color-line); border-radius: 10px; padding: .6rem .8rem; font-size: .9rem; color: var(--color-fg); outline: none; }
+.input:focus { border-color: var(--color-mint-dim); }
+.up { color: var(--color-mint); } .down { color: var(--color-rose); }
+.blur-lock { filter: blur(6px); user-select: none; pointer-events: none; }
+.grid-bg { background-image: linear-gradient(var(--color-line) 1px, transparent 1px), linear-gradient(90deg, var(--color-line) 1px, transparent 1px); background-size: 48px 48px; mask-image: radial-gradient(ellipse at top, black 20%, transparent 70%); }
+@keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.ticker { animation: ticker 60s linear infinite; }
+@keyframes pulse-dot { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
+.live-dot { animation: pulse-dot 1.6s ease-in-out infinite; }
