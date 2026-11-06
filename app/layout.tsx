@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   description: 'Wallet flows, market news, token reports and prices for crypto traders and their agents. Priced per request, paid in USDT.',
 };
 
-const NAV = [['Terminal', '/terminal'], ['Pricing', '/#pricing'], ['API docs', '/developers'], ['Revenue', '/merchant']] as const;
+const NAV = [['Ask', '/chat'], ['Terminal', '/terminal'], ['Pricing', '/#pricing'], ['API docs', '/developers'], ['Revenue', '/merchant']] as const;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

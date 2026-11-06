@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.6.0",
     "@x402/core": "2.29.0",
     "@x402/evm": "2.29.0",
     "@x402/fetch": "2.29.0",

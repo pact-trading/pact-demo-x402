@@ -27,9 +27,9 @@ export default async function Home() {
       <section className="mx-auto grid max-w-7xl gap-12 px-5 pb-16 pt-14 lg:grid-cols-[1fr_1.1fr]">
         <div className="lg:pt-6">
           <h1 className="text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">Onchain market data, priced per request.</h1>
-          <p className="mt-5 max-w-lg text-lg leading-relaxed text-dim">Wallet flows, a market newswire, token reports and spot prices. No subscription or API key: you, or your trading agent, pay for each request in USDT.</p>
+          <p className="mt-5 max-w-lg text-lg leading-relaxed text-dim">Wallet flows, a market newswire, token reports and spot prices. Ask in plain words and the analyst buys the data it needs, paying a few cents per request in USDT. No subscription, no API key.</p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link href="/desk" className="btn btn-mint">Get started <ArrowRight size={15} strokeWidth={1.75} aria-hidden /></Link>
+            <Link href="/chat" className="btn btn-mint">Ask the analyst <ArrowRight size={15} strokeWidth={1.75} aria-hidden /></Link>
             <Link href="/developers" className="btn btn-ghost"><BookOpen size={15} strokeWidth={1.75} aria-hidden /> API docs</Link>
           </div>
           <p className="mt-6 flex items-center gap-1.5 text-sm text-faint"><FlaskConical size={14} strokeWidth={1.75} aria-hidden /> New desks get 2 test USDT. Whitechain Sepolia testnet.</p>
