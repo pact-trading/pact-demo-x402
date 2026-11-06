@@ -1,32 +1,31 @@
 import type { Metadata } from 'next';
-import { Inter, JetBrains_Mono } from 'next/font/google';
+import { IBM_Plex_Mono, IBM_Plex_Sans } from 'next/font/google';
 import Link from 'next/link';
 import { Logo } from '@/components/logo';
 import { DeskBadge } from '@/components/desk-badge';
 import './globals.css';
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
-const mono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mono-face', display: 'swap' });
+const sans = IBM_Plex_Sans({ subsets: ['latin'], weight: ['400', '500', '600'], variable: '--font-plex', display: 'swap' });
+const mono = IBM_Plex_Mono({ subsets: ['latin'], weight: ['400', '500'], variable: '--font-plex-mono', display: 'swap' });
 
 export const metadata: Metadata = {
-  title: 'Sightline | Onchain market intelligence, pay per call',
-  description: 'Smart money flows, market wire, token reports and prices. No subscription: your agent pays per call in USDT over x402.',
+  title: 'Sightline · Onchain market data',
+  description: 'Wallet flows, market news, token reports and prices for crypto traders and their agents. Priced per request, paid in USDT.',
 };
 
-const NAV = [['Terminal', '/terminal'], ['API', '/developers'], ['Agents', '/developers#agent'], ['Pricing', '/#pricing']] as const;
+const NAV = [['Terminal', '/terminal'], ['Pricing', '/#pricing'], ['API docs', '/developers'], ['Revenue', '/merchant']] as const;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${mono.variable}`}>
+    <html lang="en" className={`${sans.variable} ${mono.variable}`}>
       <body className="min-h-screen bg-ink">
-        <header className="sticky top-0 z-40 border-b border-line bg-ink/85 backdrop-blur">
+        <header className="sticky top-0 z-40 border-b border-line bg-white">
           <div className="mx-auto flex h-16 max-w-7xl items-center gap-8 px-5">
             <Link href="/"><Logo /></Link>
             <nav className="hidden items-center gap-6 text-sm text-dim md:flex">
               {NAV.map(([label, href]) => <Link key={href} href={href} className="hover:text-fg">{label}</Link>)}
             </nav>
             <div className="ml-auto flex items-center gap-3">
-              <Link href="/merchant" className="hidden text-sm text-dim hover:text-fg sm:block">Revenue</Link>
               <DeskBadge />
             </div>
           </div>
@@ -36,7 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="mx-auto grid max-w-7xl gap-8 px-5 py-12 text-sm text-dim sm:grid-cols-4">
             <div className="sm:col-span-2">
               <Logo />
-              <p className="mt-3 max-w-sm">Onchain market intelligence for traders and the agents that work for them. Every call is paid in USDT over x402, settled by Pact on Whitechain.</p>
+              <p className="mt-3 max-w-sm">Onchain market data for traders and their agents. Each request is paid in USDT over x402 and settled by Pact on Whitechain.</p>
             </div>
             <div className="space-y-2">
               <p className="font-semibold text-fg">Product</p>

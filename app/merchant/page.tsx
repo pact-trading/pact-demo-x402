@@ -14,12 +14,12 @@ export default function Merchant() {
   const payers = new Set(calls.map(c => c.payer.toLowerCase()));
   return (
     <div className="mx-auto max-w-7xl px-5 py-12">
-      <p className="text-sm font-semibold uppercase tracking-[0.18em] text-mint">Revenue</p>
+      <p className="text-sm text-dim">Revenue</p>
       <h1 className="mt-2 text-3xl font-semibold tracking-tight">x402 revenue</h1>
       <p className="num mt-1 text-sm text-dim">Paid to {merchant()} · settled by Pact · no fee on x402</p>
       <div className="mt-8 grid gap-4 sm:grid-cols-4">
         {[['Revenue today', usd(sum(calls.filter(c => c.at.startsWith(today))), 3)], ['Revenue, all time', usd(sum(calls), 3)], ['Paid calls', String(calls.length)], ['Paying desks', `${payers.size} / ${vaults.length} open`]].map(([k, v]) => (
-          <div key={k} className="card p-5"><p className="text-xs font-semibold uppercase tracking-wider text-dim">{k}</p><p className="num mt-2 text-2xl font-semibold">{v}</p></div>
+          <div key={k} className="card p-5"><p className="text-xs text-dim">{k}</p><p className="num mt-2 text-2xl font-semibold">{v}</p></div>
         ))}
       </div>
       <div className="mt-6 grid gap-4 lg:grid-cols-[1fr_2fr]">

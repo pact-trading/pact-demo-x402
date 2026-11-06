@@ -124,5 +124,5 @@ export async function insight(token = 'SOL') {
 /** The free, delayed teaser on the landing page: prices 15 minutes old, flows rounded and partly hidden. */
 export async function teaser() {
   const list = await prices(TOKENS.slice(0, 12));
-  return { delayedMinutes: 15, prices: list.map(p => ({ symbol: p.symbol, price: p.price, change24h: p.change24h })), headlines: news(undefined, 6).items.map(i => ({ id: i.id, tokens: i.tokens, impact: i.impact, publishedAt: i.publishedAt, preview: `${i.headline.split(' ').slice(0, 4).join(' ')}…` })) };
+  return { delayedMinutes: 15, prices: list.map(p => ({ symbol: p.symbol, price: p.price, change24h: p.change24h, volume24h: p.volume24h })), headlines: news(undefined, 6).items.map(i => ({ id: i.id, tokens: i.tokens, impact: i.impact, publishedAt: i.publishedAt, preview: `${i.headline.split(' ').slice(0, 4).join(' ')}…` })) };
 }

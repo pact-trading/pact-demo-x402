@@ -59,12 +59,12 @@ export default function Terminal() {
         <h1 className="text-2xl font-semibold tracking-tight">Terminal</h1>
         <div className="ml-2 flex flex-wrap gap-1">
           {TOKENS.slice(0, 12).map(t => (
-            <button key={t} onClick={() => { setToken(t); setFlows(null); setInsight(null); }} className={`num rounded-lg px-2.5 py-1 text-xs font-semibold ${token === t ? 'bg-mint text-ink' : 'bg-ink-2 text-dim hover:text-fg'}`}>{t}</button>
+            <button key={t} onClick={() => { setToken(t); setFlows(null); setInsight(null); }} className={`num rounded-lg px-2.5 py-1 text-xs font-semibold ${token === t ? 'bg-fg text-white' : 'bg-ink-2 text-dim hover:text-fg'}`}>{t}</button>
           ))}
         </div>
         <span className="chip ml-auto">Paying from {desk.label} · {short(desk.account)}</span>
       </div>
-      {error && <p className="mt-4 rounded-xl border border-rose/40 bg-rose/10 px-4 py-3 text-sm text-rose">{error}</p>}
+      {error && <p className="mt-4 rounded-md border border-rose/40 bg-rose/10 px-4 py-3 text-sm text-rose">{error}</p>}
 
       <div className="mt-6 grid gap-4 lg:grid-cols-3">
         <section className="card p-5 lg:col-span-2">
@@ -74,7 +74,7 @@ export default function Terminal() {
           </div>
           <div className={`mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4 ${flows ? '' : 'blur-lock'}`}>
             {[['Net flow 24h', flows ? m(flows.netFlowUsd24h) : '+$24.1M', flows ? flows.netFlowUsd24h >= 0 : true], ['Net flow 7d', flows ? m(flows.netFlowUsd7d) : '+$80.2M', flows ? flows.netFlowUsd7d >= 0 : true], ['Exchange netflow', flows ? m(flows.exchangeNetflowUsd24h) : '-$9.4M', flows ? flows.exchangeNetflowUsd24h <= 0 : true], ['Buyers / sellers', flows ? `${flows.buyers} / ${flows.sellers}` : '142 / 77', true]].map(([k, v, good]) => (
-              <div key={String(k)} className="rounded-xl bg-ink-2 p-3"><p className="text-xs text-dim">{k}</p><p className={`num mt-1 text-lg font-semibold ${good ? 'up' : 'down'}`}>{v}</p></div>
+              <div key={String(k)} className="rounded-md bg-ink-2 p-3"><p className="text-xs text-dim">{k}</p><p className={`num mt-1 text-lg font-semibold ${good ? 'up' : 'down'}`}>{v}</p></div>
             ))}
           </div>
           <table className={`mt-5 w-full text-sm ${flows ? '' : 'blur-lock'}`}>

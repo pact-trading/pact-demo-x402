@@ -1,19 +1,18 @@
-export function Mark({ className = 'size-7' }: { className?: string }) {
+/** A horizon line with a sighting notch: the "line" you read a market by. */
+export function Mark({ className = 'h-5 w-5' }: { className?: string }) {
   return (
-    <svg viewBox="0 0 64 64" className={className} aria-hidden>
-      <rect width="64" height="64" rx="16" fill="currentColor" className="text-ink-2" />
-      <path d="M8 32c6.5-10 14.7-15 24-15s17.5 5 24 15c-6.5 10-14.7 15-24 15S14.5 42 8 32Z" fill="none" stroke="var(--color-mint)" strokeWidth="4" strokeLinejoin="round" />
-      <circle cx="32" cy="32" r="7" fill="var(--color-mint)" />
-      <path d="M4 32h56" stroke="var(--color-ink-2)" strokeWidth="3" />
-      <path d="M41 32h19" stroke="var(--color-mint)" strokeWidth="3" strokeLinecap="round" />
+    <svg viewBox="0 0 24 24" className={className} aria-hidden>
+      <rect x="0.5" y="0.5" width="23" height="23" fill="var(--color-fg)" />
+      <path d="M3 15.5h7.2l1.8-7 1.8 7H21" fill="none" stroke="var(--color-ink-1)" strokeWidth="1.8" strokeLinejoin="miter" />
+      <circle cx="12" cy="7.2" r="1.6" fill="var(--color-mint)" />
     </svg>
   );
 }
 export function Logo() {
   return (
-    <span className="flex items-center gap-2.5">
+    <span className="flex items-center gap-2">
       <Mark />
-      <span className="text-[17px] font-semibold tracking-tight text-fg">Sightline</span>
+      <span className="text-[17px] font-semibold tracking-tight leading-none text-fg">Sightline</span>
     </span>
   );
 }

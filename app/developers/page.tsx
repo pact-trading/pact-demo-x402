@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { ENDPOINTS } from '@/lib/catalog';
 import { usd } from '@/lib/chain';
 
-const Code = ({ children }: { children: string }) => <pre className="num overflow-x-auto rounded-xl border border-line bg-ink p-4 text-[12.5px] leading-relaxed text-dim">{children}</pre>;
+const Code = ({ children }: { children: string }) => <pre className="num overflow-x-auto rounded-md border border-line bg-ink p-4 text-[12.5px] leading-relaxed text-dim">{children}</pre>;
 
 export default function Developers() {
   return (
@@ -14,7 +14,7 @@ export default function Developers() {
       </aside>
       <div className="min-w-0 space-y-16">
         <section id="flow">
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-mint">API reference</p>
+          <p className="text-sm text-dim">API reference</p>
           <h1 className="mt-3 text-4xl font-semibold tracking-tight">One HTTP request, one payment.</h1>
           <p className="mt-4 max-w-2xl text-dim">Sightline speaks x402 v2. Call an endpoint without paying and you get <span className="num text-fg">402 Payment Required</span> with the price. Your client signs a USDT payment from its desk and retries; Pact verifies and settles it on Whitechain, then you get the data and a receipt in the <span className="num text-fg">PAYMENT-RESPONSE</span> header.</p>
           <ol className="mt-8 grid gap-3 sm:grid-cols-4">

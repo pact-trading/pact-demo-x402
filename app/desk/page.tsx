@@ -87,12 +87,12 @@ export default function DeskPage() {
 
   if (!desk) return (
     <div className="mx-auto max-w-5xl px-5 py-14">
-      <p className="text-sm font-semibold uppercase tracking-[0.18em] text-mint">Your desk</p>
+      <p className="text-sm text-dim">Your desk</p>
       <h1 className="mt-3 text-4xl font-semibold tracking-tight">Open a desk. Pay per call.</h1>
       <p className="mt-3 max-w-2xl text-dim">A desk is a small USDT vault on Whitechain that you own. A session key in this browser, or in your AI agent, pays for each call from it, never more than the limits you sign. You can revoke the key or withdraw at any time.</p>
       <div className="mt-10 grid gap-6 lg:grid-cols-[1.25fr_1fr]">
         <div className="card p-6">
-          <div className="grid grid-cols-2 gap-2 rounded-xl bg-ink-2 p-1 text-sm">
+          <div className="grid grid-cols-2 gap-2 rounded-md bg-ink-2 p-1 text-sm">
             {(['quick', 'wallet'] as const).map(m => (
               <button key={m} onClick={() => setMode(m)} className={`rounded-lg px-3 py-2 font-semibold transition ${mode === m ? 'bg-ink-3 text-fg' : 'text-dim hover:text-fg'}`}>
                 {m === 'quick' ? 'Quick start' : 'Use my wallet'}
@@ -139,7 +139,7 @@ export default function DeskPage() {
     <div className="mx-auto max-w-6xl px-5 py-12">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-mint">Your desk</p>
+          <p className="text-sm text-dim">Your desk</p>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight">{desk.label}</h1>
           <p className="num mt-1 text-sm text-dim">Vault <a className="hover:text-fg" href={`${explorer}/address/${desk.account}`} target="_blank" rel="noreferrer">{desk.account} ↗</a></p>
         </div>
@@ -147,11 +147,11 @@ export default function DeskPage() {
           <Link href="/terminal" className="btn btn-mint">Open terminal</Link>
         </div>
       </div>
-      {error && <p className="mt-4 rounded-xl border border-rose/40 bg-rose/10 px-4 py-3 text-sm text-rose">{error}</p>}
+      {error && <p className="mt-4 rounded-md border border-rose/40 bg-rose/10 px-4 py-3 text-sm text-rose">{error}</p>}
 
       <div className="mt-8 grid gap-4 md:grid-cols-4">
         <div className="card p-5 md:col-span-2">
-          <p className="text-xs font-semibold uppercase tracking-wider text-dim">Balance</p>
+          <p className="text-xs text-dim">Balance</p>
           <p className="num mt-2 text-4xl font-semibold">{vault ? usd(vault.balanceMinor) : '…'} <span className="text-base font-normal text-dim">USDT</span></p>
           <div className="mt-5 flex flex-wrap gap-2">
             {vault && !vault.faucetUsed && <button className="btn btn-mint" disabled={!!busy} onClick={() => act('faucet', () => post(`/api/vault/${desk.account}/faucet`, {}))}>{busy === 'faucet' ? 'Sending…' : 'Get 2 test USDT'}</button>}
@@ -160,13 +160,13 @@ export default function DeskPage() {
           <p className="mt-3 text-xs text-faint">Top up by sending USDT on Whitechain Sepolia to the vault address. Only you (the owner) can withdraw.</p>
         </div>
         <div className="card p-5">
-          <p className="text-xs font-semibold uppercase tracking-wider text-dim">Spent today</p>
+          <p className="text-xs text-dim">Spent today</p>
           <p className="num mt-2 text-2xl font-semibold">{vault ? usd(vault.spentTodayMinor, 3) : '…'}</p>
           <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-ink-3"><div className="h-full rounded-full bg-mint" style={{ width: `${pct}%` }} /></div>
           <p className="mt-2 text-xs text-dim">of {vault ? usd(vault.dailyCapMinor) : '…'} daily limit · resets 00:00 UTC</p>
         </div>
         <div className="card p-5">
-          <p className="text-xs font-semibold uppercase tracking-wider text-dim">Session key</p>
+          <p className="text-xs text-dim">Session key</p>
           <p className={`mt-2 text-lg font-semibold ${vault?.status === 'active' ? 'text-mint' : 'text-rose'}`}>{vault?.status ?? '…'}</p>
           <p className="mt-1 text-xs text-dim">Max {vault ? usd(vault.perCallCapMinor) : '…'} per call</p>
           <p className="text-xs text-dim">Until {vault ? new Date(vault.expiresAt).toLocaleDateString() : '…'}</p>
@@ -202,7 +202,7 @@ export default function DeskPage() {
           <div id="agent" className="card p-5">
             <p className="font-semibold">Connect an AI agent</p>
             <p className="mt-1 text-sm text-dim">Give your agent this desk&apos;s session key. It pays per call within the same limits, and you can revoke it here.</p>
-            <pre className="num mt-4 overflow-x-auto rounded-xl bg-ink p-4 text-[11.5px] leading-relaxed text-dim">{envBlock.replace(desk.sessionKey, `${desk.sessionKey.slice(0, 10)}…${desk.sessionKey.slice(-6)}`)}</pre>
+            <pre className="num mt-4 overflow-x-auto rounded-md bg-ink p-4 text-[11.5px] leading-relaxed text-dim">{envBlock.replace(desk.sessionKey, `${desk.sessionKey.slice(0, 10)}…${desk.sessionKey.slice(-6)}`)}</pre>
             <div className="mt-3 flex flex-wrap gap-2">
               <button className="btn btn-ghost" onClick={() => copy(envBlock, 'env')}>{copied === 'env' ? 'Copied .env' : 'Copy .env for the agent'}</button>
               <Link href="/developers#agent" className="btn btn-ghost">Agent quickstart</Link>
