@@ -9,7 +9,7 @@ const sans = IBM_Plex_Sans({ subsets: ['latin'], weight: ['400', '500', '600'], 
 const mono = IBM_Plex_Mono({ subsets: ['latin'], weight: ['400', '500'], variable: '--font-plex-mono', display: 'swap' });
 
 export const metadata: Metadata = {
-  title: 'Sightline · Onchain market data',
+  title: 'Sightline: onchain market data',
   description: 'Wallet flows, market news, token reports and prices for crypto traders and their agents. Priced per request, paid in USDT.',
 };
 

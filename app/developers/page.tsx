@@ -1,3 +1,5 @@
+import { ArrowRight } from 'lucide-react';
+import { DatasetIcon } from '@/components/dataset-icon';
 import Link from 'next/link';
 import { ENDPOINTS } from '@/lib/catalog';
 import { usd } from '@/lib/chain';
@@ -26,12 +28,12 @@ export default function Developers() {
 
         <section id="endpoints">
           <h2 className="text-2xl font-semibold">Endpoints</h2>
-          <p className="mt-2 text-sm text-dim">Network <span className="num">eip155:1874</span> · asset USDT · scheme <span className="num">exact</span> (Permit2) · free catalogue at <a className="num text-mint" href="/api/v1">GET /api/v1</a></p>
+          <p className="mt-2 text-sm text-dim">Network <span className="num">eip155:1874</span>, asset USDT, scheme <span className="num">exact</span> (Permit2), free catalogue at <a className="num text-mint" href="/api/v1">GET /api/v1</a></p>
           <div className="mt-6 space-y-4">
             {ENDPOINTS.map(e => (
               <div key={e.id} className="card p-5">
                 <div className="flex flex-wrap items-center gap-3">
-                  <span className="chip !text-mint">GET</span><span className="num font-semibold">{e.path}</span>
+                  <span className="grid size-7 place-items-center rounded-md border border-line text-dim"><DatasetIcon id={e.id} /></span><span className="chip !text-mint">GET</span><span className="num font-semibold">{e.path}</span>
                   <span className="num ml-auto text-lg font-semibold">{usd(e.priceMinor, 3)}</span>
                 </div>
                 <p className="mt-2 text-sm text-dim">{e.summary}</p>
@@ -97,7 +99,7 @@ const res = await pay('http://localhost:3240/api/v1/news?token=SOL');`}</Code></
               {[['PerCallCap', 'The price is above the desk’s per-call limit.'], ['DailyCap', 'Today’s limit is spent; resets 00:00 UTC.'], ['SessionExpired', 'The key expired (30 days) or was revoked by the owner.'], ['MerchantDenied', 'The desk may only pay Sightline.'], ['transfer failed', 'Not enough USDT in the desk.']].map(([a, b]) => <tr key={a} className="border-t border-line"><td className="num py-2.5 pr-4 text-rose">{a}</td><td className="py-2.5 text-dim">{b}</td></tr>)}
             </tbody>
           </table></div>
-          <p className="mt-4 text-sm text-dim">Refusals are checked by the vault contract before anything is broadcast, so a refused call costs nothing. Pact settles at most 1 USDT per payment. <Link href="/desk" className="text-mint">Open a desk →</Link></p>
+          <p className="mt-4 text-sm text-dim">Refusals are checked by the vault contract before anything is broadcast, so a refused call costs nothing. Pact settles at most 1 USDT per payment. <Link href="/desk" className="inline-flex items-center gap-1 text-mint">Open a desk <ArrowRight size={14} strokeWidth={1.75} aria-hidden /></Link></p>
         </section>
       </div>
     </div>

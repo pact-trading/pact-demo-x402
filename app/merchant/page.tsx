@@ -1,3 +1,5 @@
+import { Activity, ArrowUpRight, CalendarDays, TrendingUp, Wallet } from 'lucide-react';
+import { DatasetIcon } from '@/components/dataset-icon';
 import { ENDPOINTS } from '@/lib/catalog';
 import { explorer, short, usd } from '@/lib/chain';
 import { merchant } from '@/lib/server/chain';
@@ -16,10 +18,10 @@ export default function Merchant() {
     <div className="mx-auto max-w-7xl px-5 py-12">
       <p className="text-sm text-dim">Revenue</p>
       <h1 className="mt-2 text-3xl font-semibold tracking-tight">x402 revenue</h1>
-      <p className="num mt-1 text-sm text-dim">Paid to {merchant()} · settled by Pact · no fee on x402</p>
+      <p className="num mt-1 text-sm text-dim">Paid to {merchant()}, settled by Pact, no fee on x402</p>
       <div className="mt-8 grid gap-4 sm:grid-cols-4">
-        {[['Revenue today', usd(sum(calls.filter(c => c.at.startsWith(today))), 3)], ['Revenue, all time', usd(sum(calls), 3)], ['Paid calls', String(calls.length)], ['Paying desks', `${payers.size} / ${vaults.length} open`]].map(([k, v]) => (
-          <div key={k} className="card p-5"><p className="text-xs text-dim">{k}</p><p className="num mt-2 text-2xl font-semibold">{v}</p></div>
+        {([[CalendarDays, 'Revenue today', usd(sum(calls.filter(c => c.at.startsWith(today))), 3)], [TrendingUp, 'Revenue, all time', usd(sum(calls), 3)], [Activity, 'Paid calls', String(calls.length)], [Wallet, 'Paying desks', `${payers.size} / ${vaults.length} open`]] as const).map(([Icon, k, v]) => (
+          <div key={k} className="card p-5"><p className="flex items-center gap-1.5 text-xs text-dim"><Icon size={14} strokeWidth={1.75} aria-hidden /> {k}</p><p className="num mt-2 text-2xl font-semibold">{v}</p></div>
         ))}
       </div>
       <div className="mt-6 grid gap-4 lg:grid-cols-[1fr_2fr]">
@@ -27,7 +29,7 @@ export default function Merchant() {
           <p className="font-semibold">By endpoint</p>
           <ul className="mt-3 divide-y divide-line text-sm">
             {ENDPOINTS.map(e => { const list = calls.filter(c => c.path.startsWith(e.path) || c.endpoint === e.name); return (
-              <li key={e.id} className="flex justify-between py-2.5"><span>{e.name}<span className="ml-2 text-xs text-faint">{list.length} calls</span></span><span className="num">{usd(sum(list), 3)}</span></li>
+              <li key={e.id} className="flex justify-between py-2.5"><span className="flex items-center gap-2"><DatasetIcon id={e.id} className="text-dim" />{e.name}<span className="ml-2 text-xs text-faint">{list.length} calls</span></span><span className="num">{usd(sum(list), 3)}</span></li>
             ); })}
           </ul>
         </div>
@@ -44,7 +46,7 @@ export default function Merchant() {
                     <td className="py-2.5"><span className="chip">{c.via}</span></td>
                     <td className="py-2.5">{c.endpoint}</td>
                     <td className="num py-2.5">{usd(c.priceMinor, 3)}</td>
-                    <td className="num px-5 py-2.5 text-right">{c.txHash && <a className="text-mint hover:underline" href={`${explorer}/tx/${c.txHash}`} target="_blank" rel="noreferrer">{short(c.txHash)} ↗</a>}</td>
+                    <td className="num px-5 py-2.5 text-right">{c.txHash && <a className="text-mint hover:underline" href={`${explorer}/tx/${c.txHash}`} target="_blank" rel="noreferrer">{short(c.txHash)} <ArrowUpRight size={13} strokeWidth={1.75} aria-hidden className="inline" /></a>}</td>
                   </tr>
                 ))}
                 {!calls.length && <tr><td colSpan={6} className="px-5 py-10 text-center text-dim">No paid calls yet.</td></tr>}

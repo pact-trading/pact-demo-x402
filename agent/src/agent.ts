@@ -70,4 +70,4 @@ for (let turn = 0; turn < 12; turn++) {
 }
 
 const spent = sightline.receipts.reduce((t, r) => t + (Number.isFinite(r.priceUsdt) ? r.priceUsdt : 0), 0);
-console.log(`\n— ${sightline.receipts.length} paid calls, $${spent.toFixed(3)} USDT, settled by Pact on Whitechain.`);
+console.log(`\n${sightline.receipts.length} paid calls, $${spent.toFixed(3)} USDT, settled by Pact on Whitechain.`);

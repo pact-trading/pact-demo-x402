@@ -1,5 +1,7 @@
 'use client';
 
+import { CircleCheck, Loader2, Receipt, RefreshCw, TriangleAlert, Unlock, Wallet } from 'lucide-react';
+import { DatasetIcon } from '@/components/dataset-icon';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { ENDPOINTS, TOKENS, type Endpoint } from '@/lib/catalog';
@@ -50,7 +52,7 @@ export default function Terminal() {
   );
 
   const Buy = ({ id, onClick, label }: { id: Endpoint['id']; onClick: () => void; label?: string }) => (
-    <button className="btn btn-mint !px-3 !py-1.5 text-xs" disabled={!!busy} onClick={onClick}>{busy === id ? 'Paying…' : `${label ?? 'Refresh'} · ${usd(ep(id).priceMinor, 3)}`}</button>
+    <button className="btn btn-mint !px-3 !py-1.5 text-xs" disabled={!!busy} onClick={onClick}>{busy === id ? <Loader2 size={13} className="animate-spin" aria-hidden /> : label === 'Refresh' ? <RefreshCw size={13} strokeWidth={1.75} aria-hidden /> : <Unlock size={13} strokeWidth={1.75} aria-hidden />}{busy === id ? 'Paying…' : `${label ?? 'Refresh'} ${usd(ep(id).priceMinor, 3)}`}</button>
   );
 
   return (
@@ -62,14 +64,14 @@ export default function Terminal() {
             <button key={t} onClick={() => { setToken(t); setFlows(null); setInsight(null); }} className={`num rounded-lg px-2.5 py-1 text-xs font-semibold ${token === t ? 'bg-fg text-white' : 'bg-ink-2 text-dim hover:text-fg'}`}>{t}</button>
           ))}
         </div>
-        <span className="chip ml-auto">Paying from {desk.label} · {short(desk.account)}</span>
+        <span className="chip ml-auto"><Wallet size={12} strokeWidth={1.75} aria-hidden /> Paying from {desk.label}, {short(desk.account)}</span>
       </div>
       {error && <p className="mt-4 rounded-md border border-rose/40 bg-rose/10 px-4 py-3 text-sm text-rose">{error}</p>}
 
       <div className="mt-6 grid gap-4 lg:grid-cols-3">
         <section className="card p-5 lg:col-span-2">
           <div className="flex items-center justify-between">
-            <div><p className="font-semibold">Smart money · {token}</p><p className="text-xs text-dim">4,213 labelled wallets · last 24h</p></div>
+            <div><p className="flex items-center gap-2 font-semibold"><DatasetIcon id="smart-money" /> Smart money: {token}</p><p className="text-xs text-dim">4,213 labelled wallets, last 24h</p></div>
             <Buy id="smart-money" label={flows ? 'Refresh' : 'Unlock'} onClick={() => buy<Flows>('smart-money', `?token=${token}`, setFlows)} />
           </div>
           <div className={`mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4 ${flows ? '' : 'blur-lock'}`}>
@@ -94,7 +96,7 @@ export default function Terminal() {
 
         <section className="card p-5">
           <div className="flex items-center justify-between">
-            <p className="font-semibold">Token report · {token}</p>
+            <p className="flex items-center gap-2 font-semibold"><DatasetIcon id="insight" /> Token report: {token}</p>
             <Buy id="insight" label={insight ? 'Refresh' : 'Unlock'} onClick={() => buy<Insight>('insight', `?token=${token}`, setInsight)} />
           </div>
           <div className={insight ? '' : 'blur-lock'}>
@@ -108,13 +110,13 @@ export default function Terminal() {
                 <div key={k} className="flex justify-between"><dt className="text-dim">{k}</dt><dd className="num">{v}</dd></div>
               ))}
             </dl>
-            <ul className="mt-4 space-y-1 text-xs text-faint">{(insight?.risks ?? ['Supply broadly distributed']).map(r => <li key={r}>• {r}</li>)}</ul>
+            <ul className="mt-4 space-y-1 text-xs text-faint">{(insight?.risks ?? ['Supply broadly distributed']).map(r => <li key={r} className="flex items-center gap-1.5"><TriangleAlert size={12} strokeWidth={1.75} aria-hidden /> {r}</li>)}</ul>
           </div>
         </section>
 
         <section className="card p-5">
           <div className="flex items-center justify-between">
-            <p className="font-semibold">Spot prices</p>
+            <p className="flex items-center gap-2 font-semibold"><DatasetIcon id="prices" /> Spot prices</p>
             <Buy id="prices" label={prices ? 'Refresh' : 'Load'} onClick={() => buy<Prices>('prices', `?symbols=${TOKENS.slice(0, 10).join(',')}`, setPrices)} />
           </div>
           <div className="mt-4 divide-y divide-line">
@@ -131,14 +133,14 @@ export default function Terminal() {
 
         <section className="card p-5 lg:col-span-2">
           <div className="flex items-center justify-between">
-            <p className="font-semibold">Market wire</p>
+            <p className="flex items-center gap-2 font-semibold"><DatasetIcon id="news" /> Market wire</p>
             <Buy id="news" label={news ? 'Refresh' : 'Load'} onClick={() => buy<News>('news', '?limit=10', setNews)} />
           </div>
           <ul className="mt-3 divide-y divide-line">
             {(news?.items ?? []).map(n => (
               <li key={n.id} className="flex items-start gap-3 py-3">
                 <span className={`num mt-0.5 w-12 shrink-0 text-xs font-semibold ${n.sentiment >= 0 ? 'up' : 'down'}`}>{n.sentiment >= 0 ? '+' : ''}{n.sentiment.toFixed(2)}</span>
-                <div className="flex-1"><p className="text-sm">{n.headline}</p><p className="mt-0.5 text-xs text-faint">{n.source} · {new Date(n.publishedAt).toLocaleTimeString()} · impact {n.impact}</p></div>
+                <div className="flex-1"><p className="text-sm">{n.headline}</p><p className="mt-0.5 text-xs text-faint">{n.source}, {new Date(n.publishedAt).toLocaleTimeString()}, {n.impact} impact</p></div>
                 {n.tokens.map(t => <button key={t} onClick={() => setToken(t)} className="chip hover:text-fg">{t}</button>)}
               </li>
             ))}
@@ -148,11 +150,11 @@ export default function Terminal() {
       </div>
 
       <section className="card mt-4 p-5">
-        <p className="font-semibold">Receipts this session</p>
+        <p className="flex items-center gap-2 font-semibold"><Receipt size={16} strokeWidth={1.75} aria-hidden /> Receipts this session</p>
         <div className="mt-3 flex flex-wrap gap-2">
           {receipts.map(r => (
             <a key={r.at} href={r.tx ? `${explorer}/tx/${r.tx}` : undefined} target="_blank" rel="noreferrer" className="chip hover:text-fg">
-              <span className="text-mint">✓</span>{r.endpoint} · {usd(r.price, 3)} · <span className="num">{r.tx ? short(r.tx) : 'pending'}</span>
+              <CircleCheck size={13} strokeWidth={1.75} aria-hidden className="text-gain" />{r.endpoint} {usd(r.price, 3)} <span className="num">{r.tx ? short(r.tx) : 'pending'}</span>
             </a>
           ))}
           {!receipts.length && <p className="text-sm text-dim">Each purchase settles on Whitechain in about two seconds. Receipts appear here.</p>}

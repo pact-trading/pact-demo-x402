@@ -29,7 +29,7 @@ for (let round = 1; ; round++) {
     console.error(`refused: ${(e as Error).message}`);
   }
   const last = sightline.receipts.slice(-(tokens.length + 1));
-  console.log(`  paid ${last.length} calls · ${last.filter(r => r.txHash).map(r => r.txHash!.slice(0, 10)).join(' ')}\n`);
+  console.log(`  paid ${last.length} calls: ${last.filter(r => r.txHash).map(r => r.txHash!.slice(0, 10)).join(' ')}\n`);
   if (Number(values.rounds) && round >= Number(values.rounds)) break;
   await new Promise(r => setTimeout(r, Number(values.every) * 1000));
 }

@@ -1,5 +1,6 @@
 'use client';
 
+import { ArrowUpRight, Ban, BookOpen, Bot, Check, Copy, Droplets, Fuel, Gauge, KeyRound, Loader2, Lock, LogOut, Monitor, Receipt, ShieldCheck, UserCog, Wallet, Zap } from 'lucide-react';
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { createWalletClient, custom, type Address, type Hex } from 'viem';
@@ -95,7 +96,7 @@ export default function DeskPage() {
           <div className="grid grid-cols-2 gap-2 rounded-md bg-ink-2 p-1 text-sm">
             {(['quick', 'wallet'] as const).map(m => (
               <button key={m} onClick={() => setMode(m)} className={`rounded-lg px-3 py-2 font-semibold transition ${mode === m ? 'bg-ink-3 text-fg' : 'text-dim hover:text-fg'}`}>
-                {m === 'quick' ? 'Quick start' : 'Use my wallet'}
+                <span className="inline-flex items-center gap-2">{m === 'quick' ? <Zap size={15} strokeWidth={1.75} aria-hidden /> : <Wallet size={15} strokeWidth={1.75} aria-hidden />}{m === 'quick' ? 'Quick start' : 'Use my wallet'}</span>
               </button>
             ))}
           </div>
@@ -116,15 +117,15 @@ export default function DeskPage() {
           <ol className="mt-4 space-y-4">
             {STEPS.map((s, i) => (
               <li key={s} className="flex items-center gap-3 text-sm">
-                <span className={`grid size-6 shrink-0 place-items-center rounded-full border text-xs ${step > i || step === 3 ? 'border-mint bg-mint text-ink' : step === i ? 'border-mint text-mint' : 'border-line text-faint'}`}>{step > i || step === 3 ? '✓' : i + 1}</span>
+                <span className={`grid size-6 shrink-0 place-items-center rounded-md border text-xs ${step > i || step === 3 ? 'border-mint bg-mint text-ink' : step === i ? 'border-mint text-mint' : 'border-line text-faint'}`}>{step > i || step === 3 ? <Check size={13} strokeWidth={2.5} aria-hidden /> : step === i ? <Loader2 size={13} className="animate-spin" aria-hidden /> : i + 1}</span>
                 <span className={step === i ? 'text-fg' : 'text-dim'}>{s}{step === i && i === 2 ? ' (about 15 s)' : ''}</span>
               </li>
             ))}
           </ol>
           <div className="mt-6 space-y-2 border-t border-line pt-5 text-xs text-dim">
-            <p>• Limits are enforced by the vault contract, not by us.</p>
-            <p>• Sightline pays the network fees. Pact settles each payment.</p>
-            <p>• Only Sightline can be paid from this desk.</p>
+            <p className="flex gap-2"><ShieldCheck size={14} strokeWidth={1.75} aria-hidden className="shrink-0" /> Limits are enforced by the vault contract, not by us.</p>
+            <p className="flex gap-2"><Fuel size={14} strokeWidth={1.75} aria-hidden className="shrink-0" /> Sightline pays the network fees. Pact settles each payment.</p>
+            <p className="flex gap-2"><Lock size={14} strokeWidth={1.75} aria-hidden className="shrink-0" /> Only Sightline can be paid from this desk.</p>
           </div>
         </div>
       </div>
@@ -141,32 +142,32 @@ export default function DeskPage() {
         <div>
           <p className="text-sm text-dim">Your desk</p>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight">{desk.label}</h1>
-          <p className="num mt-1 text-sm text-dim">Vault <a className="hover:text-fg" href={`${explorer}/address/${desk.account}`} target="_blank" rel="noreferrer">{desk.account} ↗</a></p>
+          <p className="num mt-1 text-sm text-dim">Vault <a className="hover:text-fg" href={`${explorer}/address/${desk.account}`} target="_blank" rel="noreferrer">{desk.account} <ArrowUpRight size={13} strokeWidth={1.75} aria-hidden className="inline" /></a></p>
         </div>
         <div className="flex gap-2">
-          <Link href="/terminal" className="btn btn-mint">Open terminal</Link>
+          <Link href="/terminal" className="btn btn-mint"><Monitor size={15} strokeWidth={1.75} aria-hidden /> Open terminal</Link>
         </div>
       </div>
       {error && <p className="mt-4 rounded-md border border-rose/40 bg-rose/10 px-4 py-3 text-sm text-rose">{error}</p>}
 
       <div className="mt-8 grid gap-4 md:grid-cols-4">
         <div className="card p-5 md:col-span-2">
-          <p className="text-xs text-dim">Balance</p>
+          <p className="flex items-center gap-1.5 text-xs text-dim"><Wallet size={14} strokeWidth={1.75} aria-hidden /> Balance</p>
           <p className="num mt-2 text-4xl font-semibold">{vault ? usd(vault.balanceMinor) : '…'} <span className="text-base font-normal text-dim">USDT</span></p>
           <div className="mt-5 flex flex-wrap gap-2">
-            {vault && !vault.faucetUsed && <button className="btn btn-mint" disabled={!!busy} onClick={() => act('faucet', () => post(`/api/vault/${desk.account}/faucet`, {}))}>{busy === 'faucet' ? 'Sending…' : 'Get 2 test USDT'}</button>}
-            <button className="btn btn-ghost" onClick={() => copy(desk.account, 'address')}>{copied === 'address' ? 'Copied' : 'Copy deposit address'}</button>
+            {vault && !vault.faucetUsed && <button className="btn btn-mint" disabled={!!busy} onClick={() => act('faucet', () => post(`/api/vault/${desk.account}/faucet`, {}))}><Droplets size={15} strokeWidth={1.75} aria-hidden />{busy === 'faucet' ? 'Sending…' : 'Get 2 test USDT'}</button>}
+            <button className="btn btn-ghost" onClick={() => copy(desk.account, 'address')}>{copied === 'address' ? <Check size={15} strokeWidth={1.75} aria-hidden /> : <Copy size={15} strokeWidth={1.75} aria-hidden />}{copied === 'address' ? 'Copied' : 'Copy deposit address'}</button>
           </div>
           <p className="mt-3 text-xs text-faint">Top up by sending USDT on Whitechain Sepolia to the vault address. Only you (the owner) can withdraw.</p>
         </div>
         <div className="card p-5">
-          <p className="text-xs text-dim">Spent today</p>
+          <p className="flex items-center gap-1.5 text-xs text-dim"><Gauge size={14} strokeWidth={1.75} aria-hidden /> Spent today</p>
           <p className="num mt-2 text-2xl font-semibold">{vault ? usd(vault.spentTodayMinor, 3) : '…'}</p>
-          <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-ink-3"><div className="h-full rounded-full bg-mint" style={{ width: `${pct}%` }} /></div>
-          <p className="mt-2 text-xs text-dim">of {vault ? usd(vault.dailyCapMinor) : '…'} daily limit · resets 00:00 UTC</p>
+          <div className="mt-3 h-1.5 overflow-hidden rounded-sm bg-ink-3"><div className="h-full bg-fg" style={{ width: `${pct}%` }} /></div>
+          <p className="mt-2 text-xs text-dim">of {vault ? usd(vault.dailyCapMinor) : '…'} daily limit, resets 00:00 UTC</p>
         </div>
         <div className="card p-5">
-          <p className="text-xs text-dim">Session key</p>
+          <p className="flex items-center gap-1.5 text-xs text-dim"><KeyRound size={14} strokeWidth={1.75} aria-hidden /> Session key</p>
           <p className={`mt-2 text-lg font-semibold ${vault?.status === 'active' ? 'text-mint' : 'text-rose'}`}>{vault?.status ?? '…'}</p>
           <p className="mt-1 text-xs text-dim">Max {vault ? usd(vault.perCallCapMinor) : '…'} per call</p>
           <p className="text-xs text-dim">Until {vault ? new Date(vault.expiresAt).toLocaleDateString() : '…'}</p>
@@ -176,7 +177,7 @@ export default function DeskPage() {
       <div className="mt-6 grid gap-6 lg:grid-cols-[1.4fr_1fr]">
         <div className="card overflow-hidden">
           <div className="flex items-center justify-between border-b border-line px-5 py-4">
-            <p className="font-semibold">Paid calls</p>
+            <p className="flex items-center gap-2 font-semibold"><Receipt size={16} strokeWidth={1.75} aria-hidden /> Paid calls</p>
             <span className="chip">{vault?.calls.length ?? 0} recent</span>
           </div>
           <div className="max-h-[420px] overflow-auto">
@@ -189,7 +190,7 @@ export default function DeskPage() {
                     <td className="py-2.5">{c.endpoint}</td>
                     <td className="py-2.5"><span className="chip">{c.via === 'agent' ? 'AI agent' : c.via === 'web' ? 'Terminal' : 'API'}</span></td>
                     <td className="num py-2.5">{usd(c.priceMinor, 3)}</td>
-                    <td className="num px-5 py-2.5 text-right">{c.txHash ? <a className="text-mint hover:underline" href={`${explorer}/tx/${c.txHash}`} target="_blank" rel="noreferrer">{short(c.txHash)} ↗</a> : <span className="text-rose">{c.reason}</span>}</td>
+                    <td className="num px-5 py-2.5 text-right">{c.txHash ? <a className="text-mint hover:underline" href={`${explorer}/tx/${c.txHash}`} target="_blank" rel="noreferrer">{short(c.txHash)} <ArrowUpRight size={13} strokeWidth={1.75} aria-hidden className="inline" /></a> : <span className="text-rose">{c.reason}</span>}</td>
                   </tr>
                 ))}
                 {!vault?.calls.length && <tr><td colSpan={5} className="px-5 py-10 text-center text-dim">No calls yet. Open the <Link href="/terminal" className="text-mint">terminal</Link> or run the agent.</td></tr>}
@@ -200,24 +201,24 @@ export default function DeskPage() {
 
         <div className="space-y-6">
           <div id="agent" className="card p-5">
-            <p className="font-semibold">Connect an AI agent</p>
+            <p className="flex items-center gap-2 font-semibold"><Bot size={16} strokeWidth={1.75} aria-hidden /> Connect an AI agent</p>
             <p className="mt-1 text-sm text-dim">Give your agent this desk&apos;s session key. It pays per call within the same limits, and you can revoke it here.</p>
             <pre className="num mt-4 overflow-x-auto rounded-md bg-ink p-4 text-[11.5px] leading-relaxed text-dim">{envBlock.replace(desk.sessionKey, `${desk.sessionKey.slice(0, 10)}…${desk.sessionKey.slice(-6)}`)}</pre>
             <div className="mt-3 flex flex-wrap gap-2">
-              <button className="btn btn-ghost" onClick={() => copy(envBlock, 'env')}>{copied === 'env' ? 'Copied .env' : 'Copy .env for the agent'}</button>
-              <Link href="/developers#agent" className="btn btn-ghost">Agent quickstart</Link>
+              <button className="btn btn-ghost" onClick={() => copy(envBlock, 'env')}>{copied === 'env' ? <Check size={15} strokeWidth={1.75} aria-hidden /> : <Copy size={15} strokeWidth={1.75} aria-hidden />}{copied === 'env' ? 'Copied .env' : 'Copy .env for the agent'}</button>
+              <Link href="/developers#agent" className="btn btn-ghost"><BookOpen size={15} strokeWidth={1.75} aria-hidden /> Agent quickstart</Link>
             </div>
           </div>
           <div className="card p-5">
-            <p className="font-semibold">Owner controls</p>
+            <p className="flex items-center gap-2 font-semibold"><UserCog size={16} strokeWidth={1.75} aria-hidden /> Owner controls</p>
             <dl className="mt-3 space-y-1.5 text-sm">
               <div className="flex justify-between gap-3"><dt className="text-dim">Owner</dt><dd className="num">{short(desk.owner)} {desk.ownerKey ? <span className="chip ml-1">this browser</span> : <span className="chip ml-1">your wallet</span>}</dd></div>
               <div className="flex justify-between gap-3"><dt className="text-dim">Session key</dt><dd className="num">{short(privateKeyToAccount(desk.sessionKey).address)}</dd></div>
               <div className="flex justify-between gap-3"><dt className="text-dim">Can pay</dt><dd>Sightline only</dd></div>
             </dl>
             <div className="mt-4 flex flex-wrap gap-2">
-              <button className="btn btn-ghost !text-rose" disabled={!!busy || vault?.status !== 'active'} onClick={revoke}>{busy === 'revoke' ? 'Revoking…' : 'Revoke session key'}</button>
-              <button className="btn btn-ghost" onClick={() => { if (confirm('Forget this desk in this browser? The vault and its funds stay onchain.')) { forgetDesk(); setDesk(null); setVault(null); setStep(-1); window.dispatchEvent(new Event('sightline:refresh')); } }}>Forget desk</button>
+              <button className="btn btn-ghost !text-rose" disabled={!!busy || vault?.status !== 'active'} onClick={revoke}><Ban size={15} strokeWidth={1.75} aria-hidden />{busy === 'revoke' ? 'Revoking…' : 'Revoke session key'}</button>
+              <button className="btn btn-ghost" onClick={() => { if (confirm('Forget this desk in this browser? The vault and its funds stay onchain.')) { forgetDesk(); setDesk(null); setVault(null); setStep(-1); window.dispatchEvent(new Event('sightline:refresh')); } }}><LogOut size={15} strokeWidth={1.75} aria-hidden /> Forget desk</button>
             </div>
           </div>
         </div>

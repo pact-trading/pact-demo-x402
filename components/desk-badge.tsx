@@ -1,5 +1,6 @@
 'use client';
 
+import { Wallet } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { usd } from '@/lib/chain';
@@ -22,10 +23,10 @@ export function DeskBadge() {
     window.addEventListener('sightline:refresh', tick);
     return () => { clearInterval(id); window.removeEventListener('sightline:refresh', tick); };
   }, []);
-  if (!has) return <Link href="/desk" className="btn btn-mint !py-2">Open a desk</Link>;
+  if (!has) return <Link href="/desk" className="btn btn-mint !py-2"><Wallet size={15} strokeWidth={1.75} aria-hidden /> Open a desk</Link>;
   return (
     <Link href="/desk" className="btn btn-ghost !py-2">
-      <span className="size-2 rounded-full bg-mint live-dot" />
+      <Wallet size={15} strokeWidth={1.75} aria-hidden className="text-dim" />
       <span className="num">{balance === null ? '…' : usd(balance)}</span>
       <span className="text-dim">USDT</span>
     </Link>

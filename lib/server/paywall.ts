@@ -50,7 +50,7 @@ export function paywall(): MiddlewareHandler {
   });
   const routes = Object.fromEntries(ENDPOINTS.map(e => [`GET ${e.path}`, {
     accepts: { scheme: 'exact', network: NETWORK, payTo: merchant(), price: { asset: USDT, amount: e.priceMinor, extra: { assetTransferMethod: 'permit2' } }, maxTimeoutSeconds: 120 },
-    description: `Sightline · ${e.name}`, mimeType: 'application/json',
+    description: `Sightline: ${e.name}`, mimeType: 'application/json',
   }]));
   // Initialise lazily on the first paid request (syncs supported kinds from Pact once).
   const inner = paymentMiddleware(routes as never, server, undefined, undefined, true);
