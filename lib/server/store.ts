@@ -11,7 +11,8 @@ export interface VaultRecord {
 }
 interface Book { vaults: VaultRecord[]; calls: CallRecord[] }
 
-const dir = join(process.cwd(), 'data'), file = join(dir, 'sightline.json');
+// Vercel functions can only write to /tmp (per instance, cleared on a cold start); locally the repo's data/.
+const dir = process.env.VERCEL ? join('/tmp', 'sightline') : join(process.cwd(), 'data'), file = join(dir, 'sightline.json');
 const read = (): Book => (existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : { vaults: [], calls: [] });
 const write = (book: Book) => { mkdirSync(dir, { recursive: true }); writeFileSync(file, JSON.stringify(book, null, 2)); };
 const lower = (a: string) => a.toLowerCase();
