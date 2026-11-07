@@ -25,7 +25,7 @@ export const accountAbi = parseAbi([
   'function owner() view returns (address)',
   'error Unauthorized()', 'error InvalidPolicy()', 'error SessionExpired()', 'error MerchantDenied()', 'error PerCallCap()', 'error DailyCap()', 'error InvalidWindow()', 'error AlreadyReserved()',
 ]);
-export const factoryAbi = parseAbi(['function createAccount(address owner,bytes32 salt) returns (address)']);
+export const factoryAbi = parseAbi(['function createAccount(address owner,bytes32 salt) returns (address)', 'function isAccount(address account) view returns (bool)']);
 export const erc20Abi = parseAbi(['function balanceOf(address) view returns (uint256)', 'function allowance(address,address) view returns (uint256)', 'function transfer(address,uint256) returns (bool)']);
 
 /**

@@ -1,9 +1,41 @@
 import 'server-only';
 import { randomBytes, randomUUID } from 'node:crypto';
-import { encodeFunctionData, getAddress, isAddress, recoverTypedDataAddress, toHex, type Address, type Hex } from 'viem';
+import { encodeFunctionData, getAddress, isAddress, parseAbiItem, recoverTypedDataAddress, toHex, type Address, type Hex } from 'viem';
 import { bootstrapTypedData, EXACT, PERMIT2, revokeTypedData, sessionTypedData, USDT, type BootstrapMessage, type ReservedPayment, type RevokeMessage, type SessionMessage, type VaultStatus } from '@/lib/chain';
 import { accountAbi, erc20Abi, factory, factoryAbi, merchant, pub, relayer, revertName, send } from './chain';
-import { getVault, listCalls, saveVault, updateVault } from './store';
+import { getVault, listCalls, saveVault, updateVault, type VaultRecord } from './store';
+
+/**
+ * The vault's record, from this instance's store or, when another instance created it (Vercel keeps
+ * the JSON store per instance), rebuilt from the chain: the factory vouches for the account and the
+ * account holds its owner, session key and caps. The faucet counts as used if Sightline's relayer
+ * ever sent it USDT, so a lost record cannot claim it twice.
+ */
+async function findVault(account: string): Promise<VaultRecord | null> {
+  const known = getVault(account);
+  if (known || !isAddress(account)) return known;
+  const address = getAddress(account);
+  const ours = await pub.readContract({ address: factory(), abi: factoryAbi, functionName: 'isAccount', args: [address] }).catch(() => false);
+  if (!ours) return null;
+  const read = <T>(functionName: string) => pub.readContract({ address, abi: accountAbi, functionName: functionName as never }) as Promise<T>;
+  const [owner, sessionKey, perCall, daily, expires, latest] = await Promise.all([
+    read<Address>('owner'), read<Address>('sessionKey'), read<bigint>('perCallCap'), read<bigint>('dailyCap'), read<bigint>('expiresAt'), pub.getBlockNumber(),
+  ]);
+  const funded = await pub.getLogs({
+    address: USDT,
+    event: parseAbiItem('event Transfer(address indexed from, address indexed to, uint256 value)'),
+    args: { from: relayer().account.address, to: address },
+    fromBlock: latest > 500_000n ? latest - 500_000n : 0n,
+  }).then(logs => logs.length > 0).catch(() => true);
+  const record: VaultRecord = {
+    account: address, owner, sessionKey, label: 'Desk', perCallMinor: String(perCall), dailyMinor: String(daily),
+    expiresAt: new Date(Number(expires) * 1000).toISOString(), status: sessionKey === '0x0000000000000000000000000000000000000000' ? 'revoked' : 'active',
+    createdAt: new Date().toISOString(), faucetUsed: funded, txs: [],
+  };
+  saveVault(record);
+  return record;
+}
+export { findVault };
 
 export class VaultError extends Error {
   constructor(public code: string, public status = 400) { super(code); }
@@ -54,7 +86,7 @@ export async function createVault(body: { pendingId?: string; signatures?: Hex[]
 }
 
 export async function vaultStatus(account: string): Promise<VaultStatus> {
-  const v = getVault(account);
+  const v = await findVault(account);
   if (!v) throw new VaultError('vault_not_found', 404);
   const day = BigInt(Math.floor(Date.now() / 86_400_000));
   const read = <T>(functionName: string, args: unknown[] = []) => pub.readContract({ address: v.account, abi: accountAbi, functionName: functionName as never, args: args as never }) as Promise<T>;
@@ -75,7 +107,7 @@ export async function vaultStatus(account: string): Promise<VaultStatus> {
 
 /** The account-bound hash a session key signs for one Permit2 payment (Reservation(permitDigest, epoch)). */
 export async function sessionDigest(account: string, digest: string) {
-  if (!getVault(account)) throw new VaultError('vault_not_found', 404);
+  if (!(await findVault(account))) throw new VaultError('vault_not_found', 404);
   return pub.readContract({ address: account as Address, abi: accountAbi, functionName: 'sessionDigest', args: [digest as Hex] });
 }
 
@@ -85,7 +117,7 @@ export async function sessionDigest(account: string, digest: string) {
  * payments to itself, so this is not a free relay.
  */
 export async function reserve(body: { account?: string; payment?: ReservedPayment; signature?: Hex }) {
-  const v = body.account ? getVault(body.account) : null, p = body.payment;
+  const v = body.account ? await findVault(body.account) : null, p = body.payment;
   if (!v || !p || !body.signature) throw new VaultError('invalid_request');
   if (p.to.toLowerCase() !== merchant().toLowerCase()) throw new VaultError('merchant_not_sightline', 403);
   if (p.spender.toLowerCase() !== EXACT.toLowerCase() || BigInt(p.amount) > MAX_PER_CALL) throw new VaultError('unsupported_payment', 403);
@@ -101,13 +133,13 @@ export async function reserve(body: { account?: string; payment?: ReservedPaymen
 }
 
 export async function revokeIntent(account: string) {
-  const v = getVault(account);
+  const v = await findVault(account);
   if (!v) throw new VaultError('vault_not_found', 404);
   const nonce = await pub.readContract({ address: v.account, abi: accountAbi, functionName: 'approvalNonce' });
   return { revoke: { nonce: String(nonce), deadline: String(now() + 540) } satisfies RevokeMessage };
 }
 export async function revoke(account: string, body: { revoke?: RevokeMessage; signature?: Hex }) {
-  const v = getVault(account);
+  const v = await findVault(account);
   if (!v || !body.revoke || !body.signature) throw new VaultError('invalid_request');
   const typed = revokeTypedData(v.account, body.revoke);
   if ((await recoverTypedDataAddress({ ...typed, signature: body.signature })).toLowerCase() !== v.owner.toLowerCase()) throw new VaultError('invalid_signature');
@@ -118,7 +150,7 @@ export async function revoke(account: string, body: { revoke?: RevokeMessage; si
 
 /** Testnet only: a one-time top-up of test USDT so a new desk can try the API straight away. */
 export async function faucet(account: string) {
-  const v = getVault(account);
+  const v = await findVault(account);
   if (!v) throw new VaultError('vault_not_found', 404);
   if (v.faucetUsed) throw new VaultError('faucet_used', 409);
   const amount = BigInt(Math.round(Number(process.env.FAUCET_USDT ?? '2') * 1_000_000));

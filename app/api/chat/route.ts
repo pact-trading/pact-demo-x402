@@ -2,7 +2,7 @@ import { openai } from '@ai-sdk/openai';
 import { convertToModelMessages, jsonSchema, stepCountIs, streamText, tool, type UIMessage } from 'ai';
 import { NextResponse } from 'next/server';
 import { AGENT_TOOLS } from '@/lib/agent-tools';
-import { getVault } from '@/lib/server/store';
+import { findVault } from '@/lib/server/vault';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -29,7 +29,7 @@ function limited(key: string) {
 export async function POST(request: Request) {
   if (!process.env.OPENAI_API_KEY) return NextResponse.json({ error: 'missing_openai_key' }, { status: 503 });
   const body = (await request.json().catch(() => null)) as { account?: string; messages?: UIMessage[] } | null;
-  if (!body?.account || !getVault(body.account)) return NextResponse.json({ error: 'desk_required' }, { status: 401 });
+  if (!body?.account || !(await findVault(body.account))) return NextResponse.json({ error: 'desk_required' }, { status: 401 });
   if (!Array.isArray(body.messages) || !body.messages.length || body.messages.length > 80) return NextResponse.json({ error: 'invalid_messages' }, { status: 400 });
   if (limited(body.account)) return NextResponse.json({ error: 'rate_limited' }, { status: 429 });
 
